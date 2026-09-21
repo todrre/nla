@@ -31,3 +31,15 @@ $ x_"RLS" = sum_(i=1)^n v_i sigma_i / (sigma_i^2 + lambda^2) u_i^T b = V y. $
 
 The filter factor $sigma_i / (sigma_i^2 + lambda^2)$ can be interpreted as a low-pass filter: as $lambda << sigma_i$ it approaches $1$, at $lambda = sigma_i$ it equals $1/2$, and as $lambda >> sigma_i$ it approaches $0$.
 = Task 2
+
+Starting from the (unregularized) least-squares solution expressed via the SVD,
+$ x_"LS" = sum_(i=1)^n (u_i^T b) / sigma_i v_i, $
+small singular values $sigma_i$ can amplify noise in $b$. As in Task 1, we introduce a filter factor $phi_i (lambda)$ that damps the contribution of each term:
+$ y_i = phi_i (lambda) / sigma_i u_i^T b, quad
+  y = sum_(i=1)^n y_i v_i = sum_(i=1)^n phi_i (lambda) / sigma_i (u_i^T b) v_i. $
+
+For the truncated SVD, the filter factor is chosen as
+$ phi_i (lambda) = cases(1 & "if" i <= k, 0 & "if" i > k). $
+
+Substituting this in, only the first $k$ terms survive:
+$ V y = sum_(i=1)^k (u_i^T b) / sigma_i v_i + sum_(i=k+1)^n 0 dot (u_i^T b) / sigma_i v_i = x_"TLS". $
