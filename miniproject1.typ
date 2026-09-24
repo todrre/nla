@@ -95,12 +95,14 @@ The natural first attempt is to solve the least squares problem $limits(min)_x |
 What we often do is apply _regularization_. We add a penalty term that rewards solutions we consider reasonable. This gives the regularized least squares problem
 $ min_x ||A x - b||_2^2 + lambda^2 ||L x||_2^2. $ <eq-general>
 The parameter $lambda > 0$ controls the strength of the regularization. The matrix $L$ encodes what we know about the signal in advance and depends on the application. For example, $L = I$ favours solutions of small size, while a difference operator such as
-$ L = mat(
-  -1, 1, , , ;
-  , -1, 1, , ;
-  , , dots.down, dots.down, ;
-  , , , -1, 1
-) in RR^((n-1) times n) $
+$
+  L = mat(
+    -1, 1, , , ;
+    , -1, 1, , ;
+    , , dots.down, dots.down, ;
+    , , , -1, 1
+  ) in RR^((n-1) times n)
+$
 favours smooth solutions, since $(L x)_i = x_(i+1) - x_i$ penalizes large jumps between neighbouring entries.
 
 = Method
@@ -333,11 +335,66 @@ Here $gamma_i = alpha_i \/ beta_i$ compares how well $A$ measures the component 
 - $gamma_i << lambda$: $phi.alt_i (lambda) approx 0$, the term is damped.
 Since $alpha_i^2 + beta_i^2 = 1$, the damped terms have small $alpha_i$ and large $beta_i$.Unlike for $L = I$, where $A$ alone decides what is damped, $alpha_i$ and $beta_i$ come from the pair $(A, L)$. The choice of $L$ therefore decides which components count as unstable, for example oscillations rather than smooth parts of the signal.
 
-== One-dimensional deblurring (Task 5)
+== One-dimensional deblurring
+We now apply the method to a concrete problem: removing blur from a one-dimensional signal. A blurred signal is modelled as
+$
+  b(s) = integral_(-1)^1 K(s, t) x(t) dif t + e(s), quad K(s, t) = c e^(-beta (s - t)^2),
+$
+where the Gaussian kernel $K$ spreads each point of $x$ over its neighbours, and a larger $beta$ gives a narrower blur.
+#text(red)[
+  As the true signal we use
+  $
+    x(t) = e^t sin(pi t), quad t in [-1, 1].
+  $
+
+  Sampling at $n$ equidistant points $t_i$ with spacing $h$ and using the box rule gives $b = A x + e$ with $A_(i j) = h K(t_i, t_j)$ and noise $e = delta dot cal(N)(0, 1)$. Since the signal is smooth, we let $L$ be the first-difference matrix, which penalizes jumps between neighbouring values:
+  $
+    L = mat(
+      1, -1, , ;
+      , dots.down, dots.down, ;
+      , , 1, -1
+    ) in RR^((n-1) times n).
+  $
+  // TODO: state the parameter values used (n, beta, c, delta) once the code is final.
+  We compute the GSVD of $(A, L)$ once; only the filter factors depend on $lambda$, so many values of $lambda$ can be tried cheaply. To choose $lambda$ automatically we use the _discrepancy principle_, which picks $lambda$ so that the residual matches the noise level, $||A x_lambda - b||_2 approx delta sqrt(n)$.
+]
 
 = Results
 // Results for each part. Show that the program works: figures, (trimmed)
 // output, and so on.
+// Use the same true signal and parameters as in the Method section throughout.
+
+== Regularized vs. unregularized solution
+// Figure: true signal, blurred noisy data b, unregularized solution and
+// regularized solution in the same plot (maybe two panels, since the
+// unregularized one is huge).
+// Report relative errors ||x - x_true|| / ||x_true|| for both.
+// Comment: the unregularized solution is dominated by amplified noise.
+
+== Filter factors
+// Figure: phi_i(lambda) against gamma_i (log-log) for a few lambdas,
+// with a vertical line at gamma = lambda.
+// Comment: terms with gamma_i << lambda are damped; increasing lambda
+// moves the cut-off to the right, so more components are damped.
+
+== Effect of $lambda$
+// Figure 1: reconstructions for a few lambdas (too small, good, too large).
+// Figure 2: relative error against lambda (log-log), mark the minimum.
+// Comment: too small lambda -> noisy (under-regularization);
+// too large lambda -> over-smoothed (over-regularization). State chosen lambda.
+
+== Effect of the noise level
+// Figure: reconstructions / error curves for several delta (e.g. 1e-3, 1e-2, 1e-1).
+// Table: delta | error unregularized | best lambda | best error.
+// Comment: the best lambda grows with delta, and the unregularized error
+// grows quickly -> regularization matters more for noisier data.
+
+== Automatic choice of $lambda$
+// Figure: residual ||A x_lambda - b|| against lambda with the line delta*sqrt(n);
+// mark lambda_DP, the hand-picked lambda and the optimal lambda.
+// Table: lambda and error for discrepancy / hand-picked / optimal,
+// ideally for each noise level.
+// Comment: how close the automatic choice is to the manual/optimal one.
 
 
 = Discussion
