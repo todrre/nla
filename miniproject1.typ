@@ -7,7 +7,7 @@
 #let course-code = "1TD452"
 #let title = "Signal and Image Processing"
 #let subtitle = "Mini-project 1: Direct Methods"
-#let authors = ("Ivar Hammarberg", "Isac Persson", "Pontus Ahlberg")
+#let authors = ("Pontus Ahlberg", "Ivar Hammarberg", "Isac Persson")
 
 // ---------------------------------------------------------------------------
 //  Document settings
@@ -90,22 +90,29 @@ Many problems in signal and image processing have the same basic form. We want t
 $ b = A x + e. $
 Here $b$ is the observed data, $A$ is the _forward operator_ that describes how the measurement system (for example a blurring camera) distorts the signal, and $e$ is unknown noise.
 
-The natural first attempt is to solve the least-squares problem $min_x ||A x - b||_2^2$. But in  many applications the matrix $A$ is ill-conditioned. This means that a small changes in $b$ cause large changes in the solution.
+The natural first attempt is to solve the least squares problem $limits(min)_x ||A x - b||_2^2$. But in  many applications the matrix $A$ is ill-conditioned. This means that small changes in $b$ cause large changes on the solution.
 
-What we often do is apply _regularization_. We add a penalty term that rewards solutions we consider reasonable. This gives the regularized problem
+What we often do is apply _regularization_. We add a penalty term that rewards solutions we consider reasonable. This gives the regularized least squares problem
 $ min_x ||A x - b||_2^2 + lambda^2 ||L x||_2^2. $ <eq-general>
-The parameter $lambda > 0$ controls the strength of the regularization. The matrix $L$ encodes what we know about the signal in advance and depends on the application. For example, $L = I$ favours solutions of small size, while a difference operator favours smooth solutions.
+The parameter $lambda > 0$ controls the strength of the regularization. The matrix $L$ encodes what we know about the signal in advance and depends on the application. For example, $L = I$ favours solutions of small size, while a difference operator such as
+$ L = mat(
+  -1, 1, , , ;
+  , -1, 1, , ;
+  , , dots.down, dots.down, ;
+  , , , -1, 1
+) in RR^((n-1) times n) $
+favours smooth solutions, since $(L x)_i = x_(i+1) - x_i$ penalizes large jumps between neighbouring entries.
 
 = Method
 // Summarize the approach and explain the chosen algorithms and why they are
 // appropriate. Short code snippets or pseudocode are fine; full code goes in the appendix.
 
 == Tikhonov regularization and the SVD
-The singular value decomposition (SVD) is a useful tool for understanding least-squares problems. We splits $A$ into simple building blocks.
+The singular value decomposition (SVD) is a useful tool for understanding least squares problems. We splits $A$ into simple building blocks.
 $ A = U Sigma V^T, $
 $U$ and $V$ are orthogonal matrices and $Sigma$ is a diagonal matrix holding the singular values $sigma_1 >= sigma_2 >= dots >= 0$ of $A$. We denote the columns of $U$ and $V$ by $u_i$ and $v_i$.
 
-Using the SVD, the ordinary least-squares solution of $min_x ||A x - b||_2^2$ can be written as
+Using the SVD, the ordinary least squares solution of $limits(min)_x ||A x - b||_2^2$ can be written as
 $ x_"LS" = sum_(i=1)^n (u_i^T b) / sigma_i v_i. $
 This formula shows exactly where the trouble comes from. When $A$ is ill-conditioned, some $sigma_i$ are tiny, and dividing by them blows up the noise in $b$. To prevent this we use tikhonov regularization and add a penalty on the size of $x$
 $ min_x f(x) := ||A x - b||_2^2 + lambda^2 ||x||_2^2, $
@@ -194,7 +201,7 @@ $
   + sum_(i=k+1)^n 0 dot (u_i^T b) / sigma_i v_i
   = x_"TLS".
 $
-The truncated least-squares solution is thus a filter method with a sharp cut-off at $sigma_i = delta$, instead of the smooth transition of Tikhonov regularization.
+The truncated least squares solution is thus a filter method with a sharp cut-off at $sigma_i = delta$, instead of the smooth transition of Tikhonov regularization.
 
 
 
