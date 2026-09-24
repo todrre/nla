@@ -1,0 +1,4 @@
+# Compiled output and course material
+*.pdf
+!assets/*.pdf
+old/
