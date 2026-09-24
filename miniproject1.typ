@@ -112,13 +112,13 @@ favours smooth solutions, since $(L x)_i = x_(i+1) - x_i$ penalizes large jumps 
 // appropriate. Short code snippets or pseudocode are fine; full code goes in the appendix.
 
 == Tikhonov regularization and SVD
-Singular value decomposition (SVD) is a useful tool for understanding least-squares problems. We splits $A$ into simple building blocks.
+Singular value decomposition (SVD) is a useful tool for understanding least-squares problems. We split $A$ into simple building blocks.
 $ A = U Sigma V^T, $
 $U$ and $V$ are orthogonal matrices and $Sigma$ is a diagonal matrix holding the singular values $sigma_1 >= sigma_2 >= dots >= 0$ of $A$. We denote the columns of $U$ and $V$ by $u_i$ and $v_i$.
 
 Using the SVD, the ordinary least squares solution of $limits(min)_x ||A x - b||_2^2$ can be written as
 $ x_"LS" = sum_(i=1)^n (u_i^T b) / sigma_i v_i. $
-Here we can see the problem. When $A$ is ill-conditioned, some $sigma_i$ are tiny, and dividing by them blows up the noise in $b$. To prevent this tikhonov regularization can be used which adds a penalty on the size of $x$
+Here we can see the problem. When $A$ is ill-conditioned, some $sigma_i$ are tiny, and dividing by them blows up the noise in $b$. To prevent this, Tikhonov regularization can be used which adds a penalty on the size of $x$
 $ min_x f(x) := ||A x - b||_2^2 + lambda^2 ||x||_2^2, $
 which is @eq-general with $L = I$. Expanding $f$ gives
 $
@@ -372,7 +372,7 @@ Components with $gamma_i >> lambda$ are kept and those with $gamma_i << lambda$ 
 
 #figure(
   image("assets/task5_2.svg", width: 65%),
-  caption: [Filter factors for different $lambda$.],
+  caption: [Filter factors for different $lambda$. The dotted vertical lines show the point where $gamma_i = lambda$.],
 ) <fig-task5-2>
 
 == Effect of $lambda$
