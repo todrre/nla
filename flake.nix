@@ -18,6 +18,7 @@
             ps.scipy
             ps.matplotlib
             ps.pyqt6 # GUI backend so plt.show() opens a window
+            ps.jupyter # notebooks (task5.ipynb)
           ]))
           pkgs.qt6.qtwayland # lets the Qt window run natively on Wayland
           pkgs.typst

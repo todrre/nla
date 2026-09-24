@@ -343,23 +343,15 @@ $
   b(s) = integral_(-1)^1 K(s, t) x(t) dif t + e(s), quad K(s, t) = c e^(-beta (s - t)^2),
 $
 where the Gaussian kernel $K$ spreads each point of $x$ over its neighbours, and a larger $beta$ gives a narrower blur.
-#text(red)[
-  As the true signal we use
-  $
-    x(t) = e^t sin(pi t), quad t in [-1, 1].
-  $
+As true signal we use $x(t) = e^t sin(pi t)$. To get a linear system we replace the integral by a sum with the box quadrature rule: we split $[-1, 1]$ into $n$ boxes of width $h = 2 \/ n$ with midpoints $t_i$, and approximate the integral by the sum of box areas,
+$
+  b(t_i) approx sum_(j=1)^n h K(t_i, t_j) x(t_j) + e(t_i).
+$
+This is $b = A x + e$ with $A_(i j) = h K(t_i, t_j)$, and we take the noise as $e = delta dot cal(N)(0, 1)$. We choose $c = sqrt(beta \/ pi)$ so that the blur does not change the size of the signal, and use the first-difference matrix from the introduction as $L$.
 
-  Sampling at $n$ equidistant points $t_i$ with spacing $h$ and using the box rule gives $b = A x + e$ with $A_(i j) = h K(t_i, t_j)$ and noise $e = delta dot cal(N)(0, 1)$. Since the signal is smooth, we let $L$ be the first-difference matrix, which penalizes jumps between neighbouring values:
-  $
-    L = mat(
-      1, -1, , ;
-      , dots.down, dots.down, ;
-      , , 1, -1
-    ) in RR^((n-1) times n).
-  $
-  // TODO: state the parameter values used (n, beta, c, delta) once the code is final.
-  We compute the GSVD of $(A, L)$ once; only the filter factors depend on $lambda$, so many values of $lambda$ can be tried cheaply. To choose $lambda$ automatically we use the _discrepancy principle_, which picks $lambda$ so that the residual matches the noise level, $||A x_lambda - b||_2 approx delta sqrt(n)$.
-]
+The unregularized solution is computed with a standard least-squares solver. For the regularized solution we compute the GSVD of $(A, L)$ once and use $x = W y$ with $y_i = alpha_i \/ (alpha_i^2 + lambda^2 beta_i^2) u_i^T b$.
+// TODO: add the method for choosing lambda automatically (e.g. the discrepancy principle) once it is implemented.
+
 
 = Results
 // Results for each part. Show that the program works: figures, (trimmed)
@@ -367,11 +359,12 @@ where the Gaussian kernel $K$ spreads each point of $x$ over its neighbours, and
 // Use the same true signal and parameters as in the Method section throughout.
 
 == Regularized vs. unregularized solution
-// Figure: true signal, blurred noisy data b, unregularized solution and
-// regularized solution in the same plot (maybe two panels, since the
-// unregularized one is huge).
-// Report relative errors ||x - x_true|| / ||x_true|| for both.
-// Comment: the unregularized solution is dominated by amplified noise.
+@fig-task5-1 compares the two solutions. The blur matrix is extremely ill-conditioned, $"cond"(A) approx 10^19$, and the unregularized solution consists entirely of amplified noise, with a relative error of about $10^10$. The regularized solution follows the true signal closely and removes most of the blur: its relative error is $0.055$, compared with $0.225$ for the blurred data $b$ itself.
+
+#figure(
+  image("assets/task5_1.svg", width: 100%),
+  caption: [Left: true signal, blurred noisy data and regularized solution ($lambda = 10^(-1)$). Right: the unregularized least-squares solution; note the scale of $10^10$.],
+) <fig-task5-1>
 
 == Filter factors
 // Figure: phi_i(lambda) against gamma_i (log-log) for a few lambdas,
