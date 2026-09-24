@@ -116,7 +116,7 @@ $U$ and $V$ are orthogonal matrices and $Sigma$ is a diagonal matrix holding the
 
 Using the SVD, the ordinary least squares solution of $limits(min)_x ||A x - b||_2^2$ can be written as
 $ x_"LS" = sum_(i=1)^n (u_i^T b) / sigma_i v_i. $
-This formula shows exactly where the trouble comes from. When $A$ is ill-conditioned, some $sigma_i$ are tiny, and dividing by them blows up the noise in $b$. To prevent this we use tikhonov regularization and add a penalty on the size of $x$
+This formula shows exactly where the trouble comes from. When $A$ is ill-conditioned, some $sigma_i$ are tiny, and dividing by them blows up the noise in $b$. To prevent this tikhonov regularization can be used which adds a penalty on the size of $x$
 $ min_x f(x) := ||A x - b||_2^2 + lambda^2 ||x||_2^2, $
 which is @eq-general with $L = I$. Expanding $f$ gives
 $
