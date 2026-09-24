@@ -63,8 +63,8 @@
 // ---------------------------------------------------------------------------
 //  Main text
 // ---------------------------------------------------------------------------
-#set page(numbering: "1")
-#counter(page).update(1)
+// No page number on the table of contents; the main text starts at 1.
+#set page(numbering: none)
 #set heading(numbering: "1.1")
 #import "@preview/pavemat:0.2.0": pavemat
 #import "@preview/mannot:0.4.0": *
@@ -82,6 +82,8 @@
 
 #outline()
 #pagebreak()
+#set page(numbering: "1")
+#counter(page).update(1)
 
 = Introduction
 // Short description of the application and the issue(s) investigated, in your
