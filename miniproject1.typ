@@ -118,7 +118,7 @@ $U$ and $V$ are orthogonal matrices and $Sigma$ is a diagonal matrix holding the
 
 Using the SVD, the ordinary least squares solution of $limits(min)_x ||A x - b||_2^2$ can be written as
 $ x_"LS" = sum_(i=1)^n (u_i^T b) / sigma_i v_i. $
-This formula shows exactly where the trouble comes from. When $A$ is ill-conditioned, some $sigma_i$ are tiny, and dividing by them blows up the noise in $b$. To prevent this tikhonov regularization can be used which adds a penalty on the size of $x$
+Here we can see the problem. When $A$ is ill-conditioned, some $sigma_i$ are tiny, and dividing by them blows up the noise in $b$. To prevent this tikhonov regularization can be used which adds a penalty on the size of $x$
 $ min_x f(x) := ||A x - b||_2^2 + lambda^2 ||x||_2^2, $
 which is @eq-general with $L = I$. Expanding $f$ gives
 $
@@ -136,7 +136,7 @@ The matrix $A^T A + lambda^2 I$ is positive definite and hence invertible, so th
   align(horizon, x),
 )
 
-To see what the regularization actually does, we insert the SVD into the normal equations and simplify using $U^T U = I$ and $V^T V = V V^T = I$:
+To see what the regularization does, we insert the SVD into the normal equations and simplify using $U^T U = I$ and $V^T V = V V^T = I$:
 $
                                         (A^T A + lambda^2 I) x_"RLS" & = A^T b \
   V Sigma^T cancel(U^T U) Sigma V^T + lambda^2 cancel(V V^T) x_"RLS" & = V Sigma^T U^T b \
@@ -247,7 +247,6 @@ $ <eq-normal-general>
 The solution is unique when $A^T A + lambda^2 L^T L$ is invertible. This is the case if $A^T A + lambda^2 L^T L$ is positive definite, meaning, for $x!=0$,  $ x^T (A^T A + lambda^2 L^T L) x = ||A x||^2 + lambda^2 ||L x||^2 > 0 $
 This implies that, when there is no unique solution, $A x = L x = 0$, which is true when $x$ is in the nullspace of both $A$ and $L$. So we require that $A$ and $L$ have no common nullspace, which is done by the choice of $L$.
 
-#pagebreak()
 Instead of solving @eq-normal-general directly, we use the GSVD @eq-gsvd, which shows what the regularization does to each component. Here
 $
   Sigma_A = "diag"(alpha_1, alpha_2, dots, alpha_r, 0), quad
@@ -292,6 +291,7 @@ $
                                                           , , , , 0
                                                         )
 $
+#pagebreak()
 Solving for $y$ gives
 $
   y & = B^(-1) Sigma_A^T U^T b \
@@ -335,7 +335,7 @@ $
 Here $gamma_i = alpha_i \/ beta_i$ compares how well $A$ measures the component $w_i$ with how much $L$ penalizes it:
 - $gamma_i >> lambda$: $phi.alt_i (lambda) approx 1$, the term is kept;
 - $gamma_i << lambda$: $phi.alt_i (lambda) approx 0$, the term is damped.
-Since $alpha_i^2 + beta_i^2 = 1$, the damped terms have small $alpha_i$ and large $beta_i$.Unlike for $L = I$, where $A$ alone decides what is damped, $alpha_i$ and $beta_i$ come from the pair $(A, L)$. The choice of $L$ therefore decides which components count as unstable, for example oscillations rather than smooth parts of the signal.
+Since $alpha_i^2 + beta_i^2 = 1$, the damped terms have small $alpha_i$ and large $beta_i$. When $L = I$, only $A$ decides what is damped. For a general $L$, $alpha_i$ and $beta_i$ depend on both $A$ and $L$. So by choosing $L$ we decide which components are treated as unstable, for example oscillations instead of smooth parts of the signal.
 
 == One-dimensional deblurring
 We now apply the method to a concrete problem: removing blur from a one-dimensional signal. A blurred signal is modelled as
@@ -343,14 +343,14 @@ $
   b(s) = integral_(-1)^1 K(s, t) x(t) dif t + e(s), quad K(s, t) = c e^(-beta (s - t)^2),
 $
 where the Gaussian kernel $K$ spreads each point of $x$ over its neighbours, and a larger $beta$ gives a narrower blur.
-As true signal we use $x(t) = e^t sin(pi t)$. To get a linear system we replace the integral by a sum with the box quadrature rule: we split $[-1, 1]$ into $n$ boxes of width $h = 2 \/ n$ with midpoints $t_i$, and approximate the integral by the sum of box areas,
+As true signal we use $x(t) = e^t sin(pi t)$. We use the box quadrature rule to turn the integral into a sum. We split $[-1, 1]$ into $n$ boxes of width $h = 2 \/ n$ with midpoints $t_i$. The integral is then approximated by the sum of the box areas,
 $
   b(t_i) approx sum_(j=1)^n h K(t_i, t_j) x(t_j) + e(t_i).
 $
 This is $b = A x + e$ with $A_(i j) = h K(t_i, t_j)$, and we take the noise as $e = delta dot cal(N)(0, 1)$. We choose $c = sqrt(beta \/ pi)$ so that the blur does not change the size of the signal, and use the first-difference matrix from the introduction as $L$.
 
 The unregularized solution is computed with a standard least-squares solver. For the regularized solution we compute the GSVD of $(A, L)$ once and use $x = W y$ with $y_i = alpha_i \/ (alpha_i^2 + lambda^2 beta_i^2) u_i^T b$.
-// TODO: add the method for choosing lambda automatically (e.g. the discrepancy principle) once it is implemented.
+To choose $lambda$ without knowing the true signal, we use the _discrepancy principle_ @KARL2005183. The idea is that the solution should fit the data as well as the noise allows, but not better. So we pick the $lambda$ where the residual is as large as the noise, $||A x_lambda - b||_2 = ||e||_2 approx delta sqrt(n)$.
 
 
 = Results
@@ -359,60 +359,82 @@ The unregularized solution is computed with a standard least-squares solver. For
 // Use the same true signal and parameters as in the Method section throughout.
 
 == Regularized vs. unregularized solution
-@fig-task5-1 compares the two solutions. The blur matrix is extremely ill-conditioned, $"cond"(A) approx 10^19$, and the unregularized solution consists entirely of amplified noise, with a relative error of about $10^10$. The regularized solution follows the true signal closely and removes most of the blur: its relative error is $0.055$, compared with $0.225$ for the blurred data $b$ itself.
+Since $"cond"(A) approx 10^19$, the unregularized solution is only amplified noise, with a relative error of about $10^10$. The regularized solution follows the true signal well. Its error is $0.055$, compared with $0.225$ for the data $b$, see @fig-task5-1.
 
 #figure(
   image("assets/task5_1.svg", width: 100%),
-  caption: [Left: true signal, blurred noisy data and regularized solution ($lambda = 10^(-1)$). Right: the unregularized least-squares solution; note the scale of $10^10$.],
+  caption: [Regularized (left) and unregularized (right) solution.],
 ) <fig-task5-1>
 
+#pagebreak()
 == Filter factors
-// Figure: phi_i(lambda) against gamma_i (log-log) for a few lambdas,
-// with a vertical line at gamma = lambda.
-// Comment: terms with gamma_i << lambda are damped; increasing lambda
-// moves the cut-off to the right, so more components are damped.
+Components with $gamma_i >> lambda$ are kept and those with $gamma_i << lambda$ are suppressed. Increasing $lambda$ moves the cut-off to the right, so more components are removed, see @fig-task5-2.
+
+#figure(
+  image("assets/task5_2.svg", width: 65%),
+  caption: [Filter factors for different $lambda$.],
+) <fig-task5-2>
 
 == Effect of $lambda$
-// Figure 1: reconstructions for a few lambdas (too small, good, too large).
-// Figure 2: relative error against lambda (log-log), mark the minimum.
-// Comment: too small lambda -> noisy (under-regularization);
-// too large lambda -> over-smoothed (over-regularization). State chosen lambda.
+Too small $lambda$ lets the noise through (under-regularization), too large $lambda$ smooths away the signal (over-regularization). The smallest error, $0.054$, is at $lambda approx 0.093$, close to our hand-picked $lambda = 0.1$, see @fig-task5-3.
+
+#figure(
+  image("assets/task5_3_error.svg", width: 100%),
+  caption: [Relative error against $lambda$.],
+) <fig-task5-3>
 
 == Effect of the noise level
-// Figure: reconstructions / error curves for several delta (e.g. 1e-3, 1e-2, 1e-1).
-// Table: delta | error unregularized | best lambda | best error.
-// Comment: the best lambda grows with delta, and the unregularized error
-// grows quickly -> regularization matters more for noisier data.
+The unregularized error grows in proportion to $delta$, while the regularized error grows only slowly and the best $lambda$ increases with $delta$, see @tab-noise and @fig-task5-4.
+
+#figure(
+  table(
+    columns: 4,
+    align: (right, right, right, right),
+    stroke: none,
+    table.hline(),
+    table.header([$delta$], [error, unregularized], [best $lambda$], [error, regularized]),
+    table.hline(stroke: 0.5pt),
+    [$10^(-3)$], [$7.1 dot 10^8$], [$0.027$], [$0.040$],
+    [$10^(-2)$], [$7.1 dot 10^9$], [$0.093$], [$0.054$],
+    [$10^(-1)$], [$7.1 dot 10^10$], [$0.66$], [$0.116$],
+    table.hline(),
+  ),
+  caption: [Errors for different noise levels.],
+) <tab-noise>
+
+#figure(
+  image("assets/task5_4.svg", width: 100%),
+  caption: [Regularized solutions for different noise levels.],
+) <fig-task5-4>
 
 == Automatic choice of $lambda$
-// Figure: residual ||A x_lambda - b|| against lambda with the line delta*sqrt(n);
-// mark lambda_DP, the hand-picked lambda and the optimal lambda.
-// Table: lambda and error for discrepancy / hand-picked / optimal,
-// ideally for each noise level.
-// Comment: how close the automatic choice is to the manual/optimal one.
+The discrepancy principle gives a somewhat larger $lambda$ and a slightly larger error than the hand-picked and the best value, see @tab-lambda.
 
+#figure(
+  table(
+    columns: 3,
+    align: (left, right, right),
+    stroke: none,
+    table.hline(),
+    table.header([method], [$lambda$], [relative error]),
+    table.hline(stroke: 0.5pt),
+    [discrepancy principle], [$0.28$], [$0.084$],
+    [chosen by hand], [$0.1$], [$0.055$],
+    [best (from @fig-task5-3)], [$0.093$], [$0.054$],
+    table.hline(),
+  ),
+  caption: [Choice of $lambda$.],
+) <tab-lambda>
 
 = Discussion
 // Further comments: observations, open questions, possible extensions, and
 // any discussion questions from the mini-project description.
+Since $"cond"(A) approx 10^19$, even small noise blows up without regularization. Regularization removes the components with small generalized singular values, where this happens. More noise needs a larger $lambda$, so regularization becomes more important when the noise level grows.
+
+In practice the true signal is unknown, so the best $lambda$ cannot be found directly. The discrepancy principle only needs the noise level and still gives a good reconstruction, although it slightly over-regularizes, which is typical for the method @KARL2005183.
 
 // ---------------------------------------------------------------------------
 //  References
 // ---------------------------------------------------------------------------
 #set heading(numbering: none)
-= References
-
-
-// ---------------------------------------------------------------------------
-//  Appendix
-// ---------------------------------------------------------------------------
-#pagebreak()
-#counter(heading).update(0)
-#set heading(numbering: "A.1")
-
-= Appendix: Code
-//== GSVD (`gsvd.py`)
-//#raw(read("gsvd.py"), lang: "python", block: true)
-
-//== Task 5 (`task5_claude.py`)
-//#raw(read("task5_claude.py"), lang: "python", block: true)
+#bibliography("references.bib", title: "References")
