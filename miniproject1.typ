@@ -111,8 +111,8 @@ favours smooth solutions, since $(L x)_i = x_(i+1) - x_i$ penalizes large jumps 
 // Summarize the approach and explain the chosen algorithms and why they are
 // appropriate. Short code snippets or pseudocode are fine; full code goes in the appendix.
 
-== Tikhonov regularization and the SVD
-The singular value decomposition (SVD) is a useful tool for understanding least squares problems. We splits $A$ into simple building blocks.
+== Tikhonov regularization and SVD
+Singular value decomposition (SVD) is a useful tool for understanding least-squares problems. We splits $A$ into simple building blocks.
 $ A = U Sigma V^T, $
 $U$ and $V$ are orthogonal matrices and $Sigma$ is a diagonal matrix holding the singular values $sigma_1 >= sigma_2 >= dots >= 0$ of $A$. We denote the columns of $U$ and $V$ by $u_i$ and $v_i$.
 
@@ -229,12 +229,12 @@ The truncated least squares solution is thus a filter method with a sharp cut-of
 
 
 
-== The generalized SVD
+== Generalized SVD
 So far we have used $L = I$, which only penalizes the size of $x$. For a general $L$ the SVD of $A$ is no longer enough. Instead we use the generalized SVD (GSVD), which decomposes both matrices at once:
 $ A = U Sigma_A W^(-1), quad L = V Sigma_L W^(-1). $ <eq-gsvd>
 Here $U$ and $V$ are orthogonal, $W$ is invertible, and $Sigma_A$ and $Sigma_L$ are diagonal. The ratios $gamma_i = alpha_i \/ beta_i$ are the _generalized singular values_ of $(A, L)$.
 
-== General-form regularization and the GSVD
+== General-form regularization and GSVD
 We first characterize the solution of the general problem in @eq-general. Expanding its objective $f(x)$ as in the case $L = I$ but now with a general $L$ gives
 $
   f(x) & = (A x - b)^T (A x - b) + lambda^2 (L x)^T (L x) \
@@ -244,8 +244,8 @@ Since $f$ is convex, $x$ is a minimizer exactly when $nabla f(x) = 2 (A^T A + la
 $
   (A^T A + lambda^2 L^T L) x = A^T b.
 $ <eq-normal-general>
-The solution is unique when $A^T A + lambda^2 L^T L$ is invertible. #text(red)[*behövs antagligen ett steg till här, när är den inverterbar?*]
-
+The solution is unique when $A^T A + lambda^2 L^T L$ is invertible. This is the case if $A^T A + lambda^2 L^T L$ is positive definite, meaning, for $x!=0$,  $ x^T (A^T A + lambda^2 L^T L) x = ||A x||^2 + lambda^2 ||L x||^2 > 0 $
+This implies that, when there is no unique solution, $A x = L x = 0$, which is true when $x$ is in the nullspace of both $A$ and $L$. So we require that $A$ and $L$ have no common nullspace, which is done by the choice of $L$.
 
 #pagebreak()
 Instead of solving @eq-normal-general directly, we use the GSVD @eq-gsvd, which shows what the regularization does to each component. Here
