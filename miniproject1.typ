@@ -18,6 +18,13 @@
 #set par(justify: true)
 #set math.mat(delim: "[")
 #set math.equation(numbering: "(1)")
+// Number only labelled (i.e. referenced) equations.
+#show math.equation: it => {
+  if it.block and not it.has("label") [
+    #counter(math.equation).update(n => n - 1)
+    #math.equation(it.body, block: true, numbering: none)<unnumbered>
+  ] else { it }
+}
 #set figure(gap: 0.8em)
 #show figure.caption: set text(size: 0.9em)
 
