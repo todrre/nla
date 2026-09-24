@@ -328,10 +328,10 @@ $
   = sum_(i=1)^n phi.alt_i (lambda) (u_i^T b) / alpha_i w_i.
 $
 
-Here $gamma_i = alpha_i \/ beta_i$ weighs how well $A$ measures a component ($alpha_i$) against how much $L$ penalizes it ($beta_i$):
-- if $gamma_i >> lambda$, then $phi.alt_i (lambda) approx 1$ and the term is kept;
-- if $gamma_i << lambda$, then $phi.alt_i (lambda) approx 0$ and the term is damped away.
-A term is thus damped when $alpha_i$ is small and $beta_i$ is large (since $alpha_i^2 + beta_i^2 = 1$, the two go together): $A$ barely measures the component, so dividing by $alpha_i$ would amplify noise, and $L$ penalizes it strongly. With $L = I$ we damp the components that $A$ measures weakly. With a general $L$ we damp the components that $A$ measures weakly _relative to how much $L$ penalizes them_. Note that $alpha_i$ and $beta_i$ are not the singular values of $A$ and $L$ separately; they come from the pair $(A, L)$ in the common basis $W$. The choice of $L$ thus decides which components count as unstable, for example removing oscillations while keeping smooth parts of the signal.
+Here $gamma_i = alpha_i \/ beta_i$ compares how well $A$ measures the component $w_i$ with how much $L$ penalizes it:
+- $gamma_i >> lambda$: $phi.alt_i (lambda) approx 1$, the term is kept;
+- $gamma_i << lambda$: $phi.alt_i (lambda) approx 0$, the term is damped.
+Since $alpha_i^2 + beta_i^2 = 1$, the damped terms have small $alpha_i$ and large $beta_i$.Unlike for $L = I$, where $A$ alone decides what is damped, $alpha_i$ and $beta_i$ come from the pair $(A, L)$. The choice of $L$ therefore decides which components count as unstable, for example oscillations rather than smooth parts of the signal.
 
 == One-dimensional deblurring (Task 5)
 
