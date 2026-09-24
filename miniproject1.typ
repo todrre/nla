@@ -335,7 +335,7 @@ $
 Here $gamma_i = alpha_i \/ beta_i$ compares how well $A$ measures the component $w_i$ with how much $L$ penalizes it:
 - $gamma_i >> lambda$: $phi.alt_i (lambda) approx 1$, the term is kept;
 - $gamma_i << lambda$: $phi.alt_i (lambda) approx 0$, the term is damped.
-Since $alpha_i^2 + beta_i^2 = 1$, the damped terms have small $alpha_i$ and large $beta_i$. When $L = I$, only $A$ decides what is damped. For a general $L$, $alpha_i$ and $beta_i$ depend on both $A$ and $L$. So by choosing $L$ we decide which components are treated as unstable, for example oscillations instead of smooth parts of the signal.
+Since $alpha_i^2 + beta_i^2 = 1$, the damped terms have small $alpha_i$ and large $beta_i$. When $L = I$, only $A$ decides what is damped. For a general $L$, $alpha_i$ and $beta_i$ depend on both $A$ and $L$. So by choosing $L$ we decide which components are treated as unstable.
 
 == One-dimensional deblurring
 We now apply the method to a concrete problem: removing blur from a one-dimensional signal. A blurred signal is modelled as
