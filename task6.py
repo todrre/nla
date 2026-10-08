@@ -39,6 +39,13 @@ A, eta = build_blur_matrix(n1, n2, beta, tau)
 b = A @ x + e
 
 print(f"nnz(A) = {A.nnz}")
+nonzero_pct = 100 * A.nnz / (A.shape[0] * A.shape[1])
+print(f"Nonzero percentage of A = {nonzero_pct:.6f} %")
 plt.spy(A, markersize=0.1)
 plt.title("Sparsity pattern of A")
 plt.show()
+
+
+# 6.3 
+# A, dense: 90000²*8 bytes = 64.8 GB
+# A, sparse: (2 * nnz(A) + n + 1) * 8 bytes = (2 * 0.023171 * 90000² + 90000) * 4 bytes = 2.25 GB
