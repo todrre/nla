@@ -23,7 +23,6 @@ def blur1d(n, beta):
     h = t[1] - t[0]
     return h * c * np.exp(-beta* (t[:, None] - t[None, :]) ** 2)
 
-
 def build_blur_matrix(n1, n2, beta, tau):
     A1, A2 = blur1d(n1, beta), blur1d(n2, beta)
     eta = tau * A1.max() * A2.max()          # relativ -> absolut tröskel
@@ -49,3 +48,9 @@ plt.show()
 # 6.3 
 # A, dense: 90000²*8 bytes = 64.8 GB
 # A, sparse: (2 * nnz(A) + n + 1) * 8 bytes = (2 * 0.023171 * 90000² + 90000) * 4 bytes = 2.25 GB
+
+def first_order_finite_difference(n):
+    return sp.eye(n - 1, n) - sp.eye(n - 1, n, k=1)
+
+L_a = sp.kron(sp.eye(n2), first_order_finite_difference(n1))
+L_b = sp.kron(first_order_finite_difference(n2), sp.eye(n1))
