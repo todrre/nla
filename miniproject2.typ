@@ -86,8 +86,15 @@
 #counter(page).update(1)
 
 = Introduction
+While direct methods with regularization are useful for computing the solution to least squares problems, they require dense matrix factorizations and are therefore not suitable for large-scale problems. In this project, we explore iterative methods for solving problems. Eller nåt sånt.
 
+<<<<<<< HEAD
 = Task 6
+=======
+= Method
+== Iterative Krylov subspace methods
+
+>>>>>>> e9a1ab4 (aodspa)
 
 
 
