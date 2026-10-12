@@ -16,6 +16,7 @@
         ps.pillow # image loading (task6.ipynb)
         ps.pyqt6 # GUI backend so plt.show() opens a window
         ps.jupyter # notebooks
+        ps.numba # incomplete Cholesky preconditioner (task6.ipynb)
       ]);
     in
     {

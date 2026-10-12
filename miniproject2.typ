@@ -195,6 +195,10 @@ If M is symmetric positive definite, we can assume that in the absence of roundi
   caption: [Influence of the maximum number of iterations on the CG reconstruction and convergence ($lambda = 0.01$).],
 ) <fig:task8-maxiter>
 
+= Task 10
+Preconditioner, om använda cg bevara spd
+$L^{-1}AL^{-T}y=L^{-1}y=L^{-1}b, y=L^{T}x$
+$M=LL^{T}$ är preconditioner då cholesky bevarar spd.
 // ---------------------------------------------------------------------------
 //  References
 // ---------------------------------------------------------------------------
