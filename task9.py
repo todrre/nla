@@ -18,7 +18,7 @@ def minres(A, b, x0, tol=1e-6, maxiter=None):
         w = w - alpha*v_new
         beta = np.linalg.norm(w)
         if beta == 0:
-            break;
+            break
         v = v_new
         v_new = w/beta
 
