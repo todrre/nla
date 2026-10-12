@@ -1,4 +1,5 @@
 import numpy as np
+import scipy.sparse as sp
 def cg(A, b, x_0, tol=1e-10, max_iter=None):
     r_0 = b - A @ x_0
     p_0 = r_0.copy()
@@ -21,8 +22,8 @@ def cg(A, b, x_0, tol=1e-10, max_iter=None):
         m += 1
     return x, relres, m
 
-A = np.array([[4, 1], [1, 3]])
-b = np.array([1, 2])
+A = sp.csr_array([[4.0, 1.0], [1.0, 3.0]])
+b = np.array([1.0, 2.0])
 x_0 = np.zeros_like(b)
 x, relres, m = cg(A, b, x_0)
 print(f"Solution: {x}, Relative Residual: {relres}, Iterations: {m}")
