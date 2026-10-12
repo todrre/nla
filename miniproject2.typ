@@ -88,7 +88,6 @@
 = Introduction
 While direct methods with regularization are useful for computing the solution to least squares problems, they require dense matrix factorizations and are therefore not suitable for large-scale problems. In this project, we explore iterative methods for solving problems. Eller nåt sånt.
 
-= Task 6
 = Method
 == Iterative Krylov subspace methods
 
@@ -166,6 +165,36 @@ cannot both be zero at the same time. In other words at least on is greater than
 
 
 If M is symmetric positive definite, we can assume that in the absence of rounding errors, the CG algorithm will converge exactly in at most n iterations. (Theorem 3.9, NLA_iterative_methods)
+
+= Task 8: Implement the CG algorithm
+
+#figure(
+  stack(
+    spacing: 0.5em,
+    image("8.1.png", width: 100%),
+    image("8.1.graph.png", width: 100%),
+  ),
+  caption: [Influence of $lambda$ on the CG reconstruction and convergence.],
+) <fig:task8-lambda>
+
+#figure(
+  stack(
+    spacing: 0.5em,
+    image("8.2.png", width: 100%),
+    image("8.2.graph.png", width: 100%),
+  ),
+  caption: [Influence of the tolerance on the CG reconstruction and convergence ($lambda = 0.05$).],
+) <fig:task8-tol>
+
+#figure(
+  stack(
+    spacing: 0.5em,
+    image("8.3.png", width: 100%),
+    image("8.3.graph.png", width: 100%),
+  ),
+  caption: [Influence of the maximum number of iterations on the CG reconstruction and convergence ($lambda = 0.01$).],
+) <fig:task8-maxiter>
+
 // ---------------------------------------------------------------------------
 //  References
 // ---------------------------------------------------------------------------
