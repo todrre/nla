@@ -87,10 +87,12 @@
 
 = Introduction
 
+= Task 6
+
 
 = Task 7
 
-
+If M is symmetric positive definite, we can assume that in the absence of rounding errors, the CG algorithm will converge exactly in at most n iterations. (Theorem 3.9, NLA_iterative_methods)
 // ---------------------------------------------------------------------------
 //  References
 // ---------------------------------------------------------------------------
