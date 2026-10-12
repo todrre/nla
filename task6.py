@@ -44,7 +44,6 @@ plt.spy(A, markersize=0.1)
 plt.title("Sparsity pattern of A")
 plt.show()
 
-
 # 6.3 
 # A, dense: 90000²*8 bytes = 64.8 GB
 # A, sparse: (2 * nnz(A) + n + 1) * 8 bytes = (2 * 0.023171 * 90000² + 90000) * 4 bytes = 2.25 GB
@@ -54,3 +53,8 @@ def first_order_finite_difference(n):
 
 L_a = sp.kron(sp.eye(n2), first_order_finite_difference(n1))
 L_b = sp.kron(first_order_finite_difference(n2), sp.eye(n1))
+L = sp.vstack([L_a, L_b])
+nonzero_pct = 100 * L.nnz / (L.shape[0] * L.shape[1])
+print(f"Nonzero percentage of L = {nonzero_pct:.6f} %")
+plt.spy(L)
+plt.show()
