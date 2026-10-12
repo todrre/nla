@@ -90,7 +90,76 @@
 = Task 6
 
 
-= Task 7
+
+= Task 7: Prove that the matrix is SPD
+Let $A in RR^(m times n)$ and $L in RR^(p times n)$.
+Assume that $lambda != 0$ and
+
+$
+  "rank"( mat(A; L) ) = n.
+$
+
+Define the matrix
+
+$
+  M = A^T A + lambda^2 L^T L.
+$
+
+We want to prove that $M$ is symmetric positive definite.
+
+*Is $M$ symmetric?*
+
+A matrix is symmetric if $M^T = M$. Taking the transpose gives
+
+$
+  M^T & = (A^T A + lambda^2 L^T L)^T \
+      & =(A^T A)^T + lambda^2 (L^T L)^T \
+      & = A^T A + lambda^2 L^T L = M.
+$
+
+Therefore, $M$ is symmetric.
+
+*Is $M$ positive definite?*
+
+A symmetric matrix $M$ is positive definite if
+
+$
+  z^T M z > 0
+  quad "for all" z != 0.
+$
+
+
+
+$
+  => z^T M z & = z^T (A^T A + lambda^2 L^T L) z \
+             & = z^T A^T A z + lambda^2 z^T L^T L z \
+             & = norm(A z)_2^2 + lambda^2 norm(L z)_2^2
+$
+
+
+Since squared Euclidean norms are always non-negative and
+$lambda != 0$ implies $lambda^2 > 0$ we get:
+
+
+$
+  z^T M z
+  = norm(A z)_2^2 + lambda^2 norm(L z)_2^2
+  >= 0.
+$
+
+To prove positive definiteness, we must show that
+the inequality is strict whenever $z != 0$. The assumption $"rank"( mat(A; L) ) = n$ means that the matrix obtained by stacking $A$ and $L$ has full column rank. Therefore, its null space contains only the zero vector:
+
+$
+  mat(A; L) z = 0
+  quad & "Only if" quad z = 0 \
+  => A z = 0 "and" L z = 0
+  quad & "Only if" quad z = 0
+$
+
+Now let $z != 0$. It follows that $A z$ and $L z$
+cannot both be zero at the same time. In other words at least on is greater than zero. Which means $M$ is symmetric positive definite.
+
 
 If M is symmetric positive definite, we can assume that in the absence of rounding errors, the CG algorithm will converge exactly in at most n iterations. (Theorem 3.9, NLA_iterative_methods)
 // ---------------------------------------------------------------------------
