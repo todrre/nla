@@ -374,30 +374,6 @@ $L$ is even sparser than $A$ (@fig:task6-spy-L). Since every row has exactly two
   caption: [Sparsity pattern of $L$. Left: all of $L$. Middle: the first rows of the top half. Right: the first $3 n_1$ rows of the bottom half.],
 ) <fig:task6-spy-L>
 
-== Memory
-A dense $m times n$ matrix stores every entry as an $8$ byte number, so it needs $8 m n$ bytes. In CSR format a matrix needs $12 thin "nnz" + 4 (m + 1)$ bytes, where nnz is the number of nonzeros. @tab:memory shows that dense storage is impossible on a normal computer, while the sparse matrices fit easily.
-
-#figure(
-  table(
-    columns: 4,
-    align: (left, right, right, right),
-    stroke: none,
-    table.hline(),
-    [*Matrix*], [*Size*], [*Dense*], [*Sparse (CSR)*],
-    table.hline(stroke: 0.5pt),
-    ..(([$A$], t6A), ([$L$], t6L))
-      .map(((name, M)) => (
-        name,
-        [#thousands(M.rows) $times$ #thousands(M.cols)],
-        mem(M.dense_bytes),
-        mem(M.sparse_bytes),
-      ))
-      .flatten(),
-    table.hline(),
-  ),
-  caption: [Memory needed for dense and sparse storage of $A$ and $L$ ($beta = #t6beta$, $epsilon = #t6eps$).],
-) <tab:memory>
-
 == Influence of $beta$ and $epsilon$
 @tab:sparsity and @fig:task6-params show how the number of nonzeros of $A$ depends on $beta$ and $epsilon$.
 - A larger $beta$ gives a narrower Gaussian, so fewer entries are above $epsilon$ and $A$ becomes sparser.
