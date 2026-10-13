@@ -333,15 +333,11 @@ $
   (A x)_i = sum_j h^2 K(s_i, t_j) x_j.
 $
 
-<<<<<<< HEAD
 Finally, since $norm(s - t)_2^2 = (s_1 - t_1)^2 + (s_2 - t_2)^2$, the Gaussian kernel factors into one kernel for the $x$-direction and one for the $y$-direction. We can therefore build one-dimensional blur matrices $A_1$ and $A_2$ for each direction, and the Kronecker product gives $A$ for the whole image:
 $
   A = A_2 times.o A_1.
 $
 The order of the factors follows from $x = "vec"(X)$ stacking the columns of $X$: $A_1 in RR^(n_1 times n_1)$ blurs every column (vertical direction) and $A_2 in RR^(n_2 times n_2)$ every row (horizontal direction), so $A x = "vec"(A_1 X A_2^T)$.
-=======
-Finnaly as the problem is 2 dimensional and our A now works in one dimension, a kronecker product between the x direction and y direction gives us a A for the whole image.$ A = A_2 times.o A_1. $
->>>>>>> 4ef11ef (rerun)
 
 $A$ is now a dense #thousands(t6A.rows) $times$ #thousands(t6A.cols) matrix, which requires #mem(t6A.dense_bytes) of memory. This is unreasonably large, and pixels far apart barely affect each other anyway. So instead of storing $A$ as a dense matrix, entries below a threshold ($epsilon$) can be set to zero and the matrix can be stored in CSR (compressed sparse row) format.
 
@@ -416,8 +412,9 @@ A larger $epsilon$ also makes $A$ sparser, since more entries are set to zero. T
 #pagebreak()
 
 = Results
-== The regularization parameter $lambda$
-We use the tolerance $10^(-8)$, at most $300$ iterations, and $lambda in {0, 0.01, 0.05, 0.3, 1}$ (@fig:task8-lambda).
+== Influence of the regularization parameter $lambda$ on CG
+We use the tolerance $10^(-8)$, at most $300$ iterations, and $lambda in {0, 0.01, 0.05, 0.3, 1}$ The results are shown in @fig:task8-lambda. 
+With small $lambda$, the relative residual does not shrink much, but the reconstruction error is smaller, except for $lambda$ = 0, where the error grows. For larger $lambda$ the residual shrinks faster, but the error is larger. 
 
 #figure(
   stack(
@@ -427,13 +424,6 @@ We use the tolerance $10^(-8)$, at most $300$ iterations, and $lambda in {0, 0.0
   ),
   caption: [Influence of $lambda$ on the CG reconstruction and convergence.],
 ) <fig:task8-lambda>
-
-- *$lambda = 0$ (no regularization).* This is plain least squares. The residual stalls around $10^(-4)$ and the error grows to $1.42$. CG starts to fit the noise, exactly as predicted in the introduction, and the image is destroyed.
-- *$lambda = 0.01$.* The image is better, but there is still ringing noise, and CG needs all $300$ iterations because $M$ is still badly conditioned.
-- *$lambda = 0.05$* gives the smallest error ($0.126$) of the values we tried. This is the compromise between noise and smoothing.
-- *$lambda = 0.3$ and $lambda = 1$.* The image is too smooth and the edges are blurred, so the error grows again (over-regularization).
-- *Speed.* A larger $lambda$ makes $M$ better conditioned, so CG converges much faster ($39$–$47$ iterations instead of more than $300$), as the bound above predicts.
-- The final objective is larger for larger $lambda$, simply because the penalty term $lambda^2 norm(L x)_2^2$ is weighted more.
 
 == The stopping tolerance
 We fix $lambda = 0.05$ and at most $300$ iterations, and vary the tolerance (@fig:task8-tol).
