@@ -490,25 +490,49 @@ $M$ is symmetric positive definite, which is exactly the case CG is designed for
 
 Fortsättning följer.
 
+== Preconditioned CG
+The idea of preconditioning a problem is to turn it into a similar problem with a smaller condition number. To precondition for CG, the matrix has to stay SPD. A way of achieving this is with an incomplete Cholesky factorization $P = C C^T approx M$, where $C$ is sparse and lower triangular, we get the SPD system
+$
+  C^(-1) M C^(-T) y = C^(-1) c, quad x = C^(-T) y.
+$
+Applying CG to this system and substituting back $x$ gives PCG, which is CG with $z_m = P^(-1) r_m$:
+$
+  alpha_m = (r_m^T z_m) / (p_m^T M p_m), quad
+  beta_m = (r_(m+1)^T z_(m+1)) / (r_m^T z_m), quad
+  p_(m+1) = z_(m+1) + beta_m p_m,
+$
+with $p_0 = z_0$. The transformed system is never formed, since every iteration only needs one product with $M$ and one solve with $P$ (two triangular solves).
+
+We compare CG and PCG, both starting from $x_0 = 0$ and stopping when the relative residual $norm(c - M x_k)_2 \/ norm(c)_2$ is below $10^(-6)$ or after $500$ iterations (@fig:task10, @tab:task10).
+
+#figure(
+  image("assets/task10_cg_vs_pcg.svg", width: 100%),
+  caption: [Relative residual of CG and PCG (incomplete Cholesky) for $lambda = 0.01, 0.05, 0.1$.],
+) <fig:task10>
+
+#figure(
+  table(
+    columns: 6,
+    align: (center, left, right, right, right, right),
+    stroke: none,
+    table.hline(),
+    [$lambda$], [*Method*], [*Iter.*], [*Time [s]*], [*Rel. res.*], [*Error*],
+    table.hline(stroke: 0.5pt),
+    [$0.01$], [CG], [$138$], [$1.66$], [$9.9 dot 10^(-7)$], [$0.0316$],
+    [], [PCG], [$13$], [$1.99 + 15.6$], [$6.8 dot 10^(-7)$], [$0.0316$],
+    [$0.05$], [CG], [$43$], [$0.58$], [$9.7 dot 10^(-7)$], [$0.0365$],
+    [], [PCG], [$4$], [$0.57 + 12.6$], [$1.2 dot 10^(-7)$], [$0.0365$],
+    [$0.1$], [CG], [$26$], [$0.35$], [$9.8 dot 10^(-7)$], [$0.0461$],
+    [], [PCG], [$3$], [$0.47 + 12.7$], [$2.3 dot 10^(-7)$], [$0.0461$],
+    table.hline(),
+  ),
+  caption: [CG and PCG with tolerance $10^(-6)$: iterations, time (for PCG: solve + building the incomplete Cholesky factor), final relative residual and relative reconstruction error.],
+) <tab:task10>
+
+@tab:task10 shows that PCG needs about $10$ times fewer iterations than CG for all three values of $lambda$. Despite this, PCG is not faster: the solve itself takes about as long as CG, since each iteration is much more expensive, and building the incomplete Cholesky factor adds time. Both methods reach the tolerance and give the same reconstruction error, since they solve the same system to the same tolerance.
+
 = Summary
 We wanted to recover a sharp image $x_"true"$ from a blurred, noisy image $b = A x_"true" + e$. Solving $A x = b$ or the plain least squares problem amplifies the noise, because the blur matrix $A$ has many tiny singular values. Adding the regularization term $lambda^2 norm(L x)_2^2$ damps the noise, and the minimizer satisfies the normal equations $(A^T A + lambda^2 L^T L) x = A^T b$. For a $300 times 300$ image this is a $90 thin 000 times 90 thin 000$ system, too large for direct methods, so $A$ and $L$ are artificially made sparse. The best reconstruction is obtained with a good $lambda$ ($approx 0.05$) and a moderate tolerance. With a small $lambda$, stopping early acts as a regularizer. MINRES (Task 9) uses the same number of products per iteration and reaches a small residual slightly faster, but gives the same image, and CG is the natural method for this SPD problem.
-
-
-
-= Discussion
-// Task 13. Summarize the differences between direct methods (SVD/GSVD) and
-// iterative Krylov methods for solving inverse problems. Your discussion
-// should include
-//   - computational complexity,
-//   - memory requirements,
-//   - numerical stability,
-//   - scalability,
-//   - suitability for small and large problems,
-//   - advantages and disadvantages of each approach.
-
-
-== Comparison with LSQR
-
 
 
 // ---------------------------------------------------------------------------
