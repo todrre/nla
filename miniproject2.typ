@@ -343,7 +343,7 @@ The order of the factors follows from $x = "vec"(X)$ stacking the columns of $X$
 Finnaly as the problem is 2 dimensional and our A now works in one dimension, a kronecker product between the x direction and y direction gives us a A for the whole image.$ A = A_2 times.o A_1. $
 >>>>>>> 4ef11ef (rerun)
 
-$A$ is now a dense $90 thin 000 times 90 thin 000$ matrix, which requires about $65$ GB of memory. This is unreasonably large, and pixels far apart barely affect each other anyway. So instead of storing $A$ as a dense matrix, entries below a threshold can be set to zero and the matrix can be stored in CSR (compressed sparse row) format.
+$A$ is now a dense #thousands(t6A.rows) $times$ #thousands(t6A.cols) matrix, which requires #mem(t6A.dense_bytes) of memory. This is unreasonably large, and pixels far apart barely affect each other anyway. So instead of storing $A$ as a dense matrix, entries below a threshold ($epsilon$) can be set to zero and the matrix can be stored in CSR (compressed sparse row) format.
 
 == The regularization matrix $L$
 To penalize images that are not smooth, we need a matrix $L$ that measures how much neighbouring pixels differ. We start in one dimension, where the first-order difference matrix
@@ -354,12 +354,12 @@ computes the difference between each pair of neighbouring entries of a vector $v
 
 Since $x_"true"$ stacks the columns of $X$, applying $L_1$ to every column gives all vertical differences, likewise $L_2$ applied to every row gives all horizontal differences. Adding them together gives L:
 $
-  L = L_G = mat(I_(n_2) times.o L_1; L_2 times.o I_(n_1)) in RR^(179 thin 400 times 90 thin 000).
+  L = L_G = mat(I_(n_2) times.o L_1; L_2 times.o I_(n_1)) in RR^(#thousands(t6L.rows) times #thousands(t6L.cols)).
 $
 Given that $L x = 0$ is only attained when all pixels have the same value, and $A x = 0$ when we have the original image exactly we can conclude that $"rank" mat(A; L) = n$
 
 == Sparsity pattern of $A$
-To see how much we gain from storing $A$ as a sparse matrix, we look at its sparsity pattern, that is, where its nonzero entries are (@fig:task6-spy-A). With $beta = 1000$ and the threshold $epsilon = 10^(-4)$, $A$ has $3.05 dot 10^7$ nonzeros, which is only $0.376 %$ of all entries. Stored in CSR format, $A$ therefore needs $0.37$ GB instead of $64.8$ GB as a dense matrix.
+To see how much we gain from storing $A$ as a sparse matrix, we look at its sparsity pattern, that is, where its nonzero entries are (@fig:task6-spy-A). With $beta = #t6beta$ and the threshold $epsilon = #t6eps$, $A$ has #sci(t6A.nnz) nonzeros, which is only $#num(percent(t6A)) %$ of all entries. Stored in CSR format, $A$ therefore needs #mem(t6A.sparse_bytes) instead of #mem(t6A.dense_bytes) as a dense matrix.
 
 #figure(
   image("assets/task6_1_spy.svg", width: 85%),
@@ -367,7 +367,7 @@ To see how much we gain from storing $A$ as a sparse matrix, we look at its spar
 ) <fig:task6-spy-A>
 
 == Sparsity pattern of $L$
-$L$ is even sparser than $A$ (@fig:task6-spy-L). Since every row has exactly two nonzeros, $L$ has $358 thin 800$ nonzeros, which is only $0.0022 %$ of all entries. In CSR format, $L$ needs $5.0$ MB instead of $129$ GB as a dense matrix.
+$L$ is even sparser than $A$ (@fig:task6-spy-L). Since every row has exactly two nonzeros, $L$ has #thousands(t6L.nnz) nonzeros, which is only $#num(percent(t6L), digits: 2) %$ of all entries. In CSR format, $L$ needs #mem(t6L.sparse_bytes) instead of #mem(t6L.dense_bytes) as a dense matrix.
 
 #figure(
   image("assets/task6_2_spy.svg", width: 100%),
