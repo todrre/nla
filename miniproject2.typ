@@ -96,15 +96,9 @@ Direct methods like GSVD need too much storage and computation for large image p
 
 == Images as vectors
 
-A grayscale image is a matrix $X in RR^(n_1 times n_2)$ of pixel brightnesses from $0$ (black) to $1$ (white). Stacking its columns gives $x_"true" = "vec"(X) in RR^n, n = n_1 n_2.$
+A grayscale image can be interpreted as a matrix $X in RR^(n_1 times n_2)$, where the pixel brightnesses is represented by, $0$ (black) to $1$ (white). By stacking its columns, $X$ becomes the vector $x_"true" = "vec"(X) in RR^n, n = n_1 n_2.$
 
-We resize images to $300 times 300$, so $n = 90 000$. The goal is to recover the sharp image $x_"true"$ from the blurred, noisy observation
-
-$
-  b = A x_"true" + e,
-$ <eq:model>
-
-where $A$ is the blurring matrix and $e$ the noise.
+By using this method the original image is resized to $300 times 300$, which gives $n = 90 000$.
 
 == Least squares
 
