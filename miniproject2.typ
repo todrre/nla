@@ -92,24 +92,6 @@ The goal of part two is to recover a sharp image from a blurred one. The task bo
 
 #pagebreak()
 = Method
-
-== Iterative methods
-A direct method like GSVD works with dense matrices, which is is expensive in terms of storage and computing. Therefore, we use iterative methods to solve the deblurring problem. An iterative method uses sparse-marix products and only stores a few vectors.
-
-== Least squares
-Since $b$ contains noise, we do not ask for $A x = b$ exactly. We ask for the $x$ that fits the data best:
-$
-  min_x norm(A x - b)_2^2.
-$
-But the best fit to noisy data is again $x = A^(-1) b$, so least squares also fits the noise.
-
-== Regularization
-Real images are mostly smooth, noise is not. So we also punish rough images. The matrix $L$ takes differences between neighbouring pixels (Task 6), so $norm(L x)_2$ is large when the image is rough. We minimize
-$
-  f(x) = underbrace(norm(A x - b)_2^2, "fit the data") + underbrace(lambda^2 norm(L x)_2^2, "be smooth").
-$ <eq:tik>
-The parameter $lambda > 0$ decides how much smoothness counts: too small gives noise, too large gives blurry edges.
-
 == Iterative methods
 
 Direct methods like GSVD can be expensive for large image problems because they require a lot of storage and computation. Instead, we use iterative methods, which improve the solution step by step and mainly require matrix-vector products and a few stored vectors.
