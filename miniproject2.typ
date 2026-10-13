@@ -195,11 +195,14 @@ $
 
 When M is SPD, CG converges in at most n iterations, and the error decreases monotonically. The convergence rate depends on the condition number of M, which is improved by regularization.
 
-
 In this project, CG is implemented in Python, adapted from the algorithm in @nla_iter.
 
 
-= Building the problem
+== MINRES
+MINRES is a minimum residual method for symmetric matrices. 
+
+== Building the problem
+
 In this task we build the concrete $x_"true"$, $A$, $b$ and $L$ for our image and store $A$ and $L$ as sparse matrices. We use the parameters in @tab:params.
 
 #figure(
@@ -424,9 +427,7 @@ If M is symmetric positive definite, we can assume that in the absence of roundi
 
 For our image problem the assumption $"rank" mat(A; L) = n$ holds (see the end of the description of $L$ in Task 6), so $M$ is SPD for every $lambda != 0$ and CG can be used. For $lambda = 0$ we get $M = A^T A$, which in exact arithmetic is SPD when $A$ is invertible, but numerically it is singular because of the tiny singular values (introduction). We will see the effect of this in Task 8.1.
 
-= Task 8: Solving the normal equations with CG
-== The idea of CG
-
+== CG results (från AI)
 == The regularization parameter $lambda$
 We use the tolerance $10^(-8)$, at most $300$ iterations, and $lambda in {0, 0.01, 0.05, 0.3, 1}$ (@fig:task8-lambda).
 
@@ -490,31 +491,6 @@ The reason is the SVD picture from the introduction. The first Krylov vectors ar
 - The residual decreases (not always monotonically), and the rate is set by $kappa(M)$: a larger $lambda$ gives faster convergence.
 - The reconstruction error is what we actually care about. It levels off (good $lambda$) or even grows again (small $lambda$), so the best reconstruction is obtained by a good $lambda$ combined with a moderate tolerance.
 
-= Task 9: Solving the normal equations with MINRES
-== The idea of MINRES
-MINRES searches in the same Krylov space $x_0 + cal(K)_k (M, r_0)$ as CG, but chooses the $x_k$ with the smallest _residual_,
-$
-  x_k = arg min_(x in x_0 + cal(K)_k (M, r_0)) norm(c - M x)_2.
-$
-Since $r = -1/2 nabla f$, MINRES makes the gradient of the objective as small as possible, while CG makes the objective itself as small as possible. MINRES only needs $M$ to be symmetric, so it also works for symmetric _indefinite_ matrices, where CG can break down. Our $M$ is SPD, so both can be used.
-
-== The algorithm
-*Lanczos.* MINRES first builds an orthonormal basis $v_1, dots, v_k$ of the Krylov space. Start with $v_1 = r_0 \/ rho$, where $rho = norm(r_0)_2$. To get the next basis vector we compute $M v_k$ and remove its components along the earlier basis vectors. Because $M$ is symmetric, $M v_k$ is automatically orthogonal to all but the last two basis vectors, so only a three-term recurrence is needed:
-$
-  beta_k v_(k+1) = M v_k - alpha_k v_k - beta_(k-1) v_(k-1), quad alpha_k = v_k^T M v_k, quad beta_k = norm(M v_k - alpha_k v_k - beta_(k-1) v_(k-1))_2.
-$
-(Here $alpha_k, beta_k$ are the Lanczos coefficients, not the CG step length or the blur parameter.) In matrix form, with $V_k = [v_1, dots, v_k]$,
-$
-  M V_k = V_(k+1) underline(T)_k, quad underline(T)_k = mat(alpha_1, beta_1; beta_1, alpha_2, dots.down; , dots.down, dots.down, beta_(k-1); , , beta_(k-1), alpha_k; , , , beta_k) in RR^((k+1) times k).
-$
-
-*The small least squares problem.* Every $x$ in the search space can be written $x = x_0 + V_k y$ with $y in RR^k$. Then
-$
-  c - M x = r_0 - M V_k y = rho v_1 - V_(k+1) underline(T)_k y = V_(k+1) (rho e_1 - underline(T)_k y),
-$
-and since $V_(k+1)$ has orthonormal columns, $norm(c - M x)_2 = norm(rho e_1 - underline(T)_k y)_2$. The huge minimization over $RR^n$ has become a small $(k+1) times k$ least squares problem.
-
-*Givens rotations.* The small problem is solved with a QR factorization of $underline(T)_k$, built with _Givens rotations_. A Givens rotation $mat(c, s; -s, c)$ with $c^2 + s^2 = 1$ rotates two rows so that one chosen entry becomes zero. Since $underline(T)_k$ is tridiagonal, each new column $(beta_(k-1), alpha_k, beta_k)$ only needs the two previous rotations plus one new rotation that zeroes $beta_k$. Applying the same rotations to the right-hand side $rho e_1$, its last entry $tau$ satisfies $|tau| = norm(r_k)_2$, so the residual norm is known in every iteration without computing $c - M x_k$. Finally, $x_k$ is updated with a multiple of a new direction $p_k$, which is computed from $v_k$ and the two previous directions. Like CG, MINRES therefore only stores a few vectors of length $n$ and uses one product with $M$ per iteration. Our implementation is `minres` in the notebook, and it uses the same `LinearOperator` for $M$ as CG.
 
 == Experiment setup
 Both methods start from $x_0 = 0$, solve $M x = c$ with the same operator, and stop when the relative residual $norm(c - M x_k)_2 \/ norm(c)_2$ is below the tolerance, so the stopping criteria are identical. We count the products with $M$ by wrapping the operator in a counter. Every product with $M$ is four sparse products ($A$, $A^T$, $L$, $L^T$). The timed runs record nothing during the iterations (computing the error and objective would dominate the time), and each run is timed three times, keeping the fastest.
