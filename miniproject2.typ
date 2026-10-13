@@ -148,7 +148,7 @@ $ <eq:tik>
 
 The first term is the least squares objective, which makes the blurred reconstruction $A x$ fit the observed image $b$. The second term penalizes roughness in the reconstructed image. The parameter $lambda > 0$ controls the balance between these goals: if $lambda$ is too small, the reconstruction may contain noise; if it is too large, important details and edges may be lost.
 
-== The normal equations
+== Normal equations
 We write out $f$ and set its gradient to zero:
 $
         f(x) & = norm(A x - b)_2^2 + lambda^2 norm(L x)_2^2 \
@@ -176,12 +176,29 @@ $
   cal(K)_k (M, r_0) = "span"{r_0, M r_0, dots, M^(k-1) r_0},
 $
 
-Since every space contains the previous one, the optimal $x_k$ can only get better from one iteration to the next. After at most $n$ iterations the space contains the exact solution, but in practice far fewer are enough.
+Since every space contains the previous one, the optimal $x_k$ can only get better from one iteration to the next. After at most $n$ iterations the space contains the exact solution, but in practice far fewer are enough. Krylov methods therefore build a better basis of the same space, one vector per iteration, where every new vector is orthogonal to the earlier ones. 
 
-*A good basis.* In theory $r_0, M r_0, M^2 r_0, dots$ is a basis of the space, but in practice it is a bad one. Multiplying by $M$ again and again turns every vector towards the eigenvector of the largest eigenvalue (as in the power method), so these vectors become almost parallel and computing with them is unstable. Krylov methods therefore build a better basis of the same space, one vector per iteration, where every new vector is orthogonal to the earlier ones:
-- *CG* builds search directions $p_0, p_1, dots$ that are $M$-orthogonal, $p_i^T M p_j = 0$ for $i != j$.
-- *MINRES* builds an orthonormal basis $v_1, v_2, dots$ (the Lanczos process), $v_i^T v_j = 0$ for $i != j$ and $norm(v_i)_2 = 1$.
-Because $M$ is symmetric, a new basis vector only has to be made orthogonal to the last one or two, not to all earlier ones. Each iteration therefore costs the same, and only a few vectors of length $n$ have to be stored.
+The two methods used in this project are Conjugate Gradient (CG) and Minimum Residual (MINRES).
+
+== Conjugate Gradient
+Since $M$ is SPD, solving $M x = c$ is the same as minimizing
+$
+  phi.alt(x) = 1/2 x^T M x - c^T x.
+$
+
+We can use the update rule
+$
+  x_(m+1) = x_m + alpha_m p_m,
+$
+where 
+
+In this project, CG is implemented in Python, adapted from the algorithm in @nla_iter.
+
+For CG there is the classical bound
+$
+  norm(x_k - x_*)_M <= 2 ((sqrt(kappa) - 1) / (sqrt(kappa) + 1))^k norm(x_0 - x_*)_M, quad kappa = kappa(M) = lambda_max (M) / lambda_min (M).
+$
+If $kappa$ is close to $1$ the error decreases quickly. If $kappa$ is large the factor is close to $1$ and convergence is slow. For $lambda = 0$ we have $kappa(M) = kappa(A^T A) = kappa(A)^2$, which is enormous. The regularization helps here too: $A^T A$ is tiny for rough images (the blur erases them), while $L^T L$ is large exactly for rough images (they have large differences between neighbours). Adding $lambda^2 L^T L$ therefore lifts the smallest eigenvalues of $M$, so $kappa(M)$ decreases and CG converges faster when $lambda$ grows. The two terms complement each other: $L^T L$ is zero for constant images, but $A^T A$ is not small there.
 
 *What "optimal" means* depends on the method:
 - *CG* (Task 8) minimizes the error $norm(x - x_*)_M$, which is the same as minimizing $f$. It needs $M$ to be symmetric positive definite.
@@ -414,50 +431,6 @@ For our image problem the assumption $"rank" mat(A; L) = n$ holds (see the end o
 
 = Task 8: Solving the normal equations with CG
 == The idea of CG
-Since $M$ is SPD, solving $M x = c$ is the same as minimizing
-$
-  phi(x) = 1/2 x^T M x - c^T x,
-$
-because $nabla phi(x) = M x - c = -r$ is zero exactly at the solution. Comparing with the expansion @eq:f-expanded of our objective, with $c = A^T b$,
-$
-  f(x) = 2 phi(x) + norm(b)_2^2.
-$
-So minimizing $phi$ is _exactly the same_ as minimizing the regularized least squares objective $f$. One can also check that $norm(x - x_*)_M^2 = 2 phi(x) - 2 phi(x_*) = f(x) - f(x_*)$. Since CG chooses $x_k$ in the Krylov space with the smallest $M$-norm error (Method section), CG chooses the $x_k$ with the _smallest objective_ $f$ that is possible in that space. In particular, $f(x_k)$ decreases in every iteration, which we will see in the plots.
-
-How does CG find this $x_k$? The simplest downhill method, steepest descent, always walks along the residual $r_k = -nabla phi(x_k)$, but it zigzags and is slow. CG instead uses search directions $p_0, p_1, dots$ that are _$M$-conjugate_, $p_i^T M p_j = 0$ for $i != j$. Minimizing along a new conjugate direction does not destroy the minimization along the earlier directions, so after $k$ steps $x_k$ is the minimizer over all of $x_0 + "span"{p_0, dots, p_(k-1)} = x_0 + cal(K)_k (M, r_0)$.
-
-== The algorithm
-Our implementation (`cg` in the notebook) is the standard CG algorithm:
-
-#block(inset: (left: 1em))[
-  $x_0 = 0, quad r_0 = c - M x_0, quad p_0 = r_0$ \
-  for $k = 0, 1, 2, dots$
-  + $q_k = M p_k$ #h(1fr) (the only product with $M$)
-  + $alpha_k = (r_k^T r_k) \/ (p_k^T q_k)$ #h(1fr) (step length that minimizes $phi$ along $p_k$)
-  + $x_(k+1) = x_k + alpha_k p_k$ #h(1fr) (step)
-  + $r_(k+1) = r_k - alpha_k q_k$ #h(1fr) (new residual, without a new product)
-  + $mu_k = (r_(k+1)^T r_(k+1)) \/ (r_k^T r_k)$
-  + $p_(k+1) = r_(k+1) + mu_k p_k$ #h(1fr) (new direction, $M$-conjugate to the earlier ones)
-  + stop if $norm(r_(k+1))_2 \/ norm(c)_2 <= "tol"$ or $k + 1 = "max_iter"$
-]
-
-The new direction $p_(k+1)$ is the steepest descent direction $r_(k+1)$, corrected by a multiple of the old direction so that it becomes $M$-conjugate to all earlier directions. (The coefficient $mu_k$ is usually called $beta_k$, but we use $mu_k$ to avoid confusion with the blur parameter $beta$.)
-
-*Using the sparsity.* The task requires that we do not form any matrix-matrix products. The only place where $M$ appears is $q_k = M p_k$, which we compute with eq:matvec as $A^T (A p_k) + lambda^2 L^T (L p_k)$, that is, four sparse matrix-vector products. In the code this function is wrapped in a SciPy `LinearOperator`, so `M @ p` inside `cg` calls it. $M$ itself, and in particular the much denser $A^T A$, is never formed.
-
-*Convergence speed.* For CG there is the classical bound
-$
-  norm(x_k - x_*)_M <= 2 ((sqrt(kappa) - 1) / (sqrt(kappa) + 1))^k norm(x_0 - x_*)_M, quad kappa = kappa(M) = lambda_max (M) / lambda_min (M).
-$
-If $kappa$ is close to $1$ the error decreases quickly. If $kappa$ is large the factor is close to $1$ and convergence is slow. For $lambda = 0$ we have $kappa(M) = kappa(A^T A) = kappa(A)^2$, which is enormous. The regularization helps here too: $A^T A$ is tiny for rough images (the blur erases them), while $L^T L$ is large exactly for rough images (they have large differences between neighbours). Adding $lambda^2 L^T L$ therefore lifts the smallest eigenvalues of $M$, so $kappa(M)$ decreases and CG converges faster when $lambda$ grows. The two terms complement each other: $L^T L$ is zero for constant images, but $A^T A$ is not small there.
-
-== What we measure
-All runs start from $x_0 = 0$. After every iteration we record
-- the *relative residual* $norm(c - M x_k)_2 \/ norm(c)_2$, which is what CG uses to stop,
-- the *relative reconstruction error* $norm(x_k - x_"true")_2 \/ norm(x_"true")_2$, which tells how close we are to the real sharp image (possible only because we know $x_"true"$ here),
-- the *objective* $f(x_k) = norm(A x_k - b)_2^2 + lambda^2 norm(L x_k)_2^2$.
-
-Note that the solution $x_*$ of $M x = c$ is _not_ the true image $x_"true"$. Even the exact solution of the regularized problem contains some noise and is somewhat too smooth, so the reconstruction error does not go to zero, while the residual does.
 
 == The regularization parameter $lambda$
 We use the tolerance $10^(-8)$, at most $300$ iterations, and $lambda in {0, 0.01, 0.05, 0.3, 1}$ (@fig:task8-lambda).
