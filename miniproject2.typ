@@ -162,20 +162,22 @@ We can use the update rule
 $
   x_(m+1) = x_m + alpha_m p_m,
 $
-where
+where $p_m$ is the search direction and $alpha_m$ is the step length. We choose $p_m$ to be A-orthogonal to all previous search directions. $p_0$ is chosen to be the initial residual $r_0 = c - M x_0$. The search direction is updated according to 
+$
+  p_(m+1) = r_(m+1) + beta_m p_m,
+$, where
+$
+  beta_m = (r_(m+1)^T r_(m+1)) / (r_m^T r_m)
+$
+and
+$
+  alpha_m = (r_m^T r_m) / (p_m^T M p_m).
+$
+
+When M is SPD, CG converges in at most n iterations, and the error decreases monotonically. The convergence rate depends on the condition number of M, which is improved by regularization.
+
 
 In this project, CG is implemented in Python, adapted from the algorithm in @nla_iter.
-
-For CG there is the classical bound
-$
-  norm(x_k - x_*)_M <= 2 ((sqrt(kappa) - 1) / (sqrt(kappa) + 1))^k norm(x_0 - x_*)_M, quad kappa = kappa(M) = lambda_max (M) / lambda_min (M).
-$
-If $kappa$ is close to $1$ the error decreases quickly. If $kappa$ is large the factor is close to $1$ and convergence is slow. For $lambda = 0$ we have $kappa(M) = kappa(A^T A) = kappa(A)^2$, which is enormous. The regularization helps here too: $A^T A$ is tiny for rough images (the blur erases them), while $L^T L$ is large exactly for rough images (they have large differences between neighbours). Adding $lambda^2 L^T L$ therefore lifts the smallest eigenvalues of $M$, so $kappa(M)$ decreases and CG converges faster when $lambda$ grows. The two terms complement each other: $L^T L$ is zero for constant images, but $A^T A$ is not small there.
-
-*What "optimal" means* depends on the method:
-- *CG* (Task 8) minimizes the error $norm(x - x_*)_M$, which is the same as minimizing $f$. It needs $M$ to be symmetric positive definite.
-- *MINRES* (Task 9) minimizes the residual $norm(c - M x)_2$. It only needs $M$ to be symmetric.
-
 = Task 6: Building the problem
 In this task we build the concrete $x_"true"$, $A$, $b$ and $L$ for our image and store $A$ and $L$ as sparse matrices. We use the parameters in @tab:params.
 
