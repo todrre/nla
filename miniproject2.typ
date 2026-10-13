@@ -314,8 +314,26 @@ $
 
 Like CG, MINRES needs one matrix-vector product per iteration and a fixed number of stored vectors. CG minimizes the error in the $M$-norm, MINRES the residual in the 2-norm.
 
-== LSQR
+#block(fill: luma(245), inset: 1em, radius: 4pt, width: 100%)[
+  == Side note: LSQR
+  There are other iterative methods that can be used to solve the problem. LSQR is a third option, it is not implemented or tested in this project. This note can be skipped without missing anything in the results.
 
+  LSQR @paige1982lsqr @lsqr_se is an iterative method for least squares problems $min_x norm(hat(A) x - hat(b))_2$. Unlike CG and MINRES it does not use the normal equations, but works on the least squares problem directly.
+
+  The regularized problem @eq:tik becomes an ordinary least squares problem if we stack $A$ on top of $lambda L$:
+  $
+    norm(mat(A; lambda L) x - mat(b; 0))_2^2 = norm(A x - b)_2^2 + lambda^2 norm(L x)_2^2.
+  $
+  So we apply LSQR with $hat(A) = mat(A; lambda L)$ and $hat(b) = mat(b; 0)$.
+
+  In each iteration LSQR only multiplies a vector by $hat(A)$ and by $hat(A)^T$:
+  $
+    hat(A) v = mat(A v; lambda L v), quad hat(A)^T mat(u_1; u_2) = A^T u_1 + lambda L^T u_2.
+  $
+  These are sparse matrix-vector products so no matrix-matrix product is needed.
+
+  LSQR and CG solve the same problem, since $M = hat(A)^T hat(A)$ and $c = hat(A)^T hat(b)$, and in exact arithmetic they give the same iterates. Both use four sparse products per iteration and store only a few vectors. The difference is the rounding errors. CG works with $M$, and $kappa(M) = kappa(hat(A))^2$, so the errors are amplified more. LSQR works with $hat(A)$, which makes it more accurate for ill-conditioned problems, that is for small $lambda$. The disadvantage is that LSQR is more complicated and does slightly more work per iteration, so for a well-conditioned problem CG is just as good and simpler @paige1982lsqr.
+]
 
 == Blur matrix $A$
 To blur the image, the vector $x_"true"$ is multiplied by a blurring matrix $A$.
@@ -451,7 +469,7 @@ We use a weak regularization, $lambda = 0.01$, and tolerance $0$, so CG always r
 ) <fig:task8-maxiter>
 
 == Comparison of CG and MINRES
-CG and MINRES are compared in @fig:task9-conv and @fig:task9-relres. 
+CG and MINRES are compared in @fig:task9-conv and @fig:task9-relres.
 #figure(
   stack(
     spacing: 0.5em,
