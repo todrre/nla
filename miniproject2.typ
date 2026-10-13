@@ -584,6 +584,19 @@ Both methods start from $x_0 = 0$, solve $M x = c$ with the same operator, and s
 We wanted to recover a sharp image $x_"true"$ from a blurred, noisy image $b = A x_"true" + e$. Solving $A x = b$ or the plain least squares problem amplifies the noise, because the blur matrix $A$ has many tiny singular values. Adding the regularization term $lambda^2 norm(L x)_2^2$, which penalizes differences between neighbouring pixels, damps the noise, and the minimizer satisfies the normal equations $(A^T A + lambda^2 L^T L) x = A^T b$. For a $300 times 300$ image this is a $90 thin 000 times 90 thin 000$ system, far too large for direct methods, but $A$ and $L$ are sparse (Task 6). The matrix is symmetric positive definite (Task 7), so CG can be used, and it only needs sparse matrix-vector products (Task 8). The best reconstruction is obtained with a good $lambda$ ($approx 0.05$) and a moderate tolerance. With a small $lambda$, stopping early acts as a regularizer. MINRES (Task 9) uses the same number of products per iteration and reaches a small residual slightly faster, but gives the same image, and CG is the natural method for this SPD problem.
 
 
+
+= Discussion
+// Task 13. Summarize the differences between direct methods (SVD/GSVD) and
+// iterative Krylov methods for solving inverse problems. Your discussion
+// should include
+//   - computational complexity,
+//   - memory requirements,
+//   - numerical stability,
+//   - scalability,
+//   - suitability for small and large problems,
+//   - advantages and disadvantages of each approach.
+
+
 = Task 11
 SUPERAISVAR:LSQR can solve the regularized least-squares problem 
 \(\min_x \|Ax-b\|_2^2+\lambda^2\|Lx\|_2^2\) by rewriting it as an ordinary least-squares problem with the augmented matrix \(\widetilde A=\begin{bmatrix}A\\\lambda L\end{bmatrix}\) and vector \(\widetilde b=\begin{bmatrix}b\\0\end{bmatrix}\). It requires only products with \(\widetilde A\) and \(\widetilde A^T\), which can be computed using \(A,A^T,L,L^T\). Therefore, LSQR avoids explicitly forming \(A^TA\) and \(L^TL\), reducing memory requirements and avoiding the additional rounding errors and potential sparsity loss associated with forming the normal equations.
