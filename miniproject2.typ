@@ -195,26 +195,18 @@ In this project, CG is implemented in Python, adapted from the algorithm in @nla
 
 
 == MINRES
-MINRES (minimal residual) solves $M x = c$ for any symmetric $M$. Unlike CG, $M$ does not have to be positive definite. In iteration $m$, MINRES picks the iterate with the smallest residual in the Krylov subspace:
+MINRES (minimal residual) solves $M x = c$ for symmetric $M$, which unlike in CG does not need to be positive definite. In iteration $m$ it chooses
 $
   x_m = op("arg min", limits: #true)_(x in x_0 + cal(K)_m (M, r_0)) norm(c - M x)_2,
 $
-where $r_0 = c - M x_0$ and $cal(K)_m (M, r_0) = "span"{r_0, M r_0, dots, M^(m-1) r_0}$.
+the iterate with the smallest residual in the Krylov subspace
 
-Since $M$ is symmetric, the Lanczos process builds an orthonormal basis $V_m$ of $cal(K)_m$ with a three-term recurrence, giving
-$
-  M V_m = V_(m+1) tilde(T)_m,
-$
-where $tilde(T)_m in RR^((m+1) times m)$ is tridiagonal. Writing $x_m = x_0 + V_m y$ and using that $V_(m+1)$ has orthonormal columns, the large minimization becomes a small least squares problem:
-$
-  y_m = op("arg min", limits: #true)_y norm(beta e_1 - tilde(T)_m y)_2, quad beta = norm(r_0)_2.
-$
-This is solved by updating a QR factorization of $tilde(T)_m$ with Givens rotations, which gives the short update
+Since $M$ is symmetric, the Lanczos process reduces this to a small least squares problem with a tridiagonal matrix. This problem is solved with Givens rotations, which gives the short update
 $
   x_(m+1) = x_m + tau_m p_m.
 $
 
-Each iteration needs one matrix-vector product and stores only a fixed number of vectors. The residual norm decreases monotonically and can be read directly from the rotated right-hand side, without computing $c - M x_m$. MINRES does slightly more work per iteration than CG. Since our $M$ is SPD, both methods apply. CG minimizes the error in the $M$-norm, while MINRES minimizes the residual in the 2-norm.
+Like CG, MINRES needs one matrix-vector product per iteration and a fixed number of stored vectors. CG minimizes the error in the $M$-norm, MINRES the residual in the 2-norm.
 
 #pagebreak()
 == Building the problem
