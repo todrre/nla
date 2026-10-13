@@ -92,63 +92,41 @@ The goal of part two is to recover a sharp image from a blurred one. The task bo
 
 #pagebreak()
 = Method
-
-== Iterative methods
-An iterative method compared to a direct method (GSVD) solves the problem by iterativly guessing and improving a solution. The main reason to use iterative methods instead of direct, is because sparse-matrix products are much cheaper then dense ones.
-
-== Least squares
-Since $b$ contains noise, we do not ask for $A x = b$ exactly. We ask for the $x$ that fits the data best:
-$
-  min_x norm(A x - b)_2^2.
-$
-But the best fit to noisy data is again $x = A^(-1) b$, so least squares also fits the noise.
-
-== Regularization
-Real images are mostly smooth, noise is not. So we also punish rough images. The matrix $L$ takes differences between neighbouring pixels (Task 6), so $norm(L x)_2$ is large when the image is rough. We minimize
-$
-  f(x) = underbrace(norm(A x - b)_2^2, "fit the data") + underbrace(lambda^2 norm(L x)_2^2, "be smooth").
-$ <eq:tik>
-The parameter $lambda > 0$ decides how much smoothness counts: too small gives noise, too large gives blurry edges.
+Direct methods like GSVD need too much storage and computation for large image problems. We instead use iterative methods, which refine the solution step by step using mainly matrix-vector products and a few stored vectors.
 
 == Images as vectors
 
-A grayscale image is a matrix $X in RR^(n_1 times n_2)$, where each entry represents a pixel brightness between $0$ (black) and $1$ (white). We represent the image as a single vector by stacking its columns:
+A grayscale image is a matrix $X in RR^(n_1 times n_2)$ of pixel brightnesses from $0$ (black) to $1$ (white). Stacking its columns gives $x_"true" = "vec"(X) in RR^n, n = n_1 n_2.$
 
-$
-  x_"true" = "vec"(X) in RR^n, quad n = n_1 n_2.
-$
-
-In our project, the image is resized to $300 times 300$ pixels, so $n = 90 000$. The goal is to recover this original sharp image from its blurred and noisy version $b$. We model the observation as
+We resize images to $300 times 300$, so $n = 90 000$. The goal is to recover the sharp image $x_"true"$ from the blurred, noisy observation
 
 $
   b = A x_"true" + e,
 $ <eq:model>
 
-where $A$ is the blurring matrix and $e$ is the noise.
+where $A$ is the blurring matrix and $e$ the noise.
 
 == Least squares
 
-Since we observe $b$, but do not know the original image $x_"true"$ or the noise $e$, we want to estimate the sharp image. If there were no noise, we would have $A x = b$. In practice, noise makes an exact solution unreliable, so instead we find the image $x$ whose blurred version $A x$ is as close as possible to the observed image $b$. This gives the least squares problem:
+Only $b$ is known, not $x_"true"$ or $e$. Without noise we could solve $A x = b$, but noise makes an exact solution unreliable, so we solve
 
 $
-  min_x norm(A x - b)_2^2.
+  min_x norm(A x - b)_2^2,
 $
 
-The quantity $A x - b$ is the residual, and its squared norm measures the difference between the predicted blurred image and the observed image. However, since $b$ contains noise, minimizing the residual can also make the reconstruction fit the noise instead of the true image. Least squares alone does not prevent this, which is why we introduce regularization.
+which minimizes the residual $A x - b$, the difference between the predicted blurred image and $b$. Least squares alone also fits the noise in $b$, which motivates regularization.
 
 == Regularization
 
-Least squares tries to fit the observed image $b$, but since $b$ contains noise, the reconstructed image $x$ may also contain noise. To reduce this effect, we add a penalty that encourages the reconstructed image to be smooth.
-
-The matrix $L$ measures differences between neighbouring pixels (Task 6), so $norm(L x)_2^2$ is large when neighbouring pixels differ a lot. We therefore minimize
+To suppress noise, we penalize non-smooth reconstructions. $L$ takes differences between neighbouring pixels, so $norm(L x)_2^2$ is large when neighbours differ strongly. We minimize
 
 $
-  f(x) = underbrace(norm(A x - b)_2^2, "fit the observed data") + underbrace(lambda^2 norm(L x)_2^2, "encourage smoothness").
+  f(x) = underbrace(norm(A x - b)_2^2, "fit the observed data") + underbrace(lambda^2 norm(L x)_2^2, "encourage smoothness"),
 $ <eq:tik>
 
-The first term is the least squares objective, which makes the blurred reconstruction $A x$ fit the observed image $b$. The second term penalizes roughness in the reconstructed image. The parameter $lambda > 0$ controls the balance between these goals: if $lambda$ is too small, the reconstruction may contain noise; if it is too large, important details and edges may be lost.
+where $lambda > 0$ balances the two terms: too small leaves noise, too large loses details and edges.
 
-== Normal equations
+== The normal equations
 We write out $f$ and set its gradient to zero:
 $
         f(x) & = norm(A x - b)_2^2 + lambda^2 norm(L x)_2^2 \
@@ -176,7 +154,7 @@ $
   cal(K)_k (M, r_0) = "span"{r_0, M r_0, dots, M^(k-1) r_0},
 $
 
-Since every space contains the previous one, the optimal $x_k$ can only get better from one iteration to the next. After at most $n$ iterations the space contains the exact solution, but in practice far fewer are enough. Krylov methods therefore build a better basis of the same space, one vector per iteration, where every new vector is orthogonal to the earlier ones. 
+Since every space contains the previous one, the optimal $x_k$ can only get better from one iteration to the next. After at most $n$ iterations the space contains the exact solution, but in practice far fewer are enough. Krylov methods therefore build a better basis of the same space, one vector per iteration, where every new vector is orthogonal to the earlier ones.
 
 The two methods used in this project are Conjugate Gradient (CG) and Minimum Residual (MINRES).
 
@@ -190,7 +168,7 @@ We can use the update rule
 $
   x_(m+1) = x_m + alpha_m p_m,
 $
-where 
+where
 
 In this project, CG is implemented in Python, adapted from the algorithm in @nla_iter.
 
