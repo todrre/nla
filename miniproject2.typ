@@ -87,7 +87,7 @@
 
 = Introduction
 == Goal
-The goal of the whole project is to recover the sharp image from the blurred one. This section explains, step by step, how this goal turns into a linear algebra problem, why that problem is hard, and why it leads us to regularization, least squares and iterative methods.
+The goal of part two is to recover a sharp image from a blurred one. The task boils down to a very large least squares problem, and with a dense matrix of that size the direct methods introduced earlier become too expensive. We therefore make the matrix artificially sparse and use iterative methods that are built for sparse problems. The deblurring problem is however ill-posed, so small amounts of noise can ruin the solution, and we show how regularization turns it into a solvable one.
 
 == Images as vectors
 A grayscale image with $n_1 times n_2$ pixels is a matrix $X in RR^(n_1 times n_2)$, where the entry $X_(i j)$ is the brightness of pixel $(i, j)$: $0$ is black and $1$ is white. The image in this case is resized to $300 times 300$ pixels, so it has $n = n_1 n_2 = 90 thin 000$ pixels. We write the image as one long vector by stacking its columns on top of each other: $x_"true" = "vec"(X) in RR^n$. Pixel $(i, j)$ ends up at position $i + (j - 1) n_1$ in $x$. Two pixels that are above each other in the image are therefore neighbours in $x$, while two pixels that are next to each other horizontally are $n_1$ positions apart. We model the blurred images as according to
@@ -133,6 +133,8 @@ This is the system we solve in the rest of the report.
 $
   M x = A^T (A x) + lambda^2 L^T (L x)
 $ <eq:matvec>
+
+== Krylov subspace
 
 == Iterative Krylov subspace methods
 An iterative method starts from a guess $x_0$ (we use $x_0 = 0$, a black image) and improves it step by step, $x_1, x_2, dots$. To see how close $x_k$ is to solving $M x = c$ we use the _residual_
