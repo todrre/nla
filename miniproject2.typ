@@ -177,10 +177,10 @@ $
 
 We can use the update rule
 $
-  x_(m+1) = x_m + alpha_m p_m,
+  x_(m+1) = x_m + alpha_m p_m
 $
 where $p_m$ is the search direction and $alpha_m$ is the step length. We choose $p_m$ to be A-orthogonal to all previous search directions. $p_0$ is chosen to be the initial residual $r_0 = c - M x_0$. The search direction is updated according to
-$ p_(m+1) = r_(m+1) + beta_m p_m, $, where
+$ p_(m+1) = r_(m+1) + beta_m p_m $ where
 $
   beta_m = (r_(m+1)^T r_(m+1)) / (r_m^T r_m)
 $
@@ -195,8 +195,28 @@ In this project, CG is implemented in Python, adapted from the algorithm in @nla
 
 
 == MINRES
-MINRES is a minimum residual method for symmetric matrices. 
+MINRES (minimal residual) solves $M x = c$ for any symmetric $M$. Unlike CG, $M$ does not have to be positive definite. In iteration $m$, MINRES picks the iterate with the smallest residual in the Krylov subspace:
+$
+  x_m = op("arg min", limits: #true)_(x in x_0 + cal(K)_m (M, r_0)) norm(c - M x)_2,
+$
+where $r_0 = c - M x_0$ and $cal(K)_m (M, r_0) = "span"{r_0, M r_0, dots, M^(m-1) r_0}$.
 
+Since $M$ is symmetric, the Lanczos process builds an orthonormal basis $V_m$ of $cal(K)_m$ with a three-term recurrence, giving
+$
+  M V_m = V_(m+1) tilde(T)_m,
+$
+where $tilde(T)_m in RR^((m+1) times m)$ is tridiagonal. Writing $x_m = x_0 + V_m y$ and using that $V_(m+1)$ has orthonormal columns, the large minimization becomes a small least squares problem:
+$
+  y_m = op("arg min", limits: #true)_y norm(beta e_1 - tilde(T)_m y)_2, quad beta = norm(r_0)_2.
+$
+This is solved by updating a QR factorization of $tilde(T)_m$ with Givens rotations, which gives the short update
+$
+  x_(m+1) = x_m + tau_m p_m.
+$
+
+Each iteration needs one matrix-vector product and stores only a fixed number of vectors. The residual norm decreases monotonically and can be read directly from the rotated right-hand side, without computing $c - M x_m$. MINRES does slightly more work per iteration than CG. Since our $M$ is SPD, both methods apply. CG minimizes the error in the $M$-norm, while MINRES minimizes the residual in the 2-norm.
+
+#pagebreak()
 == Building the problem
 
 In this task we build the concrete $x_"true"$, $A$, $b$ and $L$ for our image and store $A$ and $L$ as sparse matrices. We use the parameters in @tab:params.
