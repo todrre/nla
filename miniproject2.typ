@@ -451,7 +451,7 @@ We use a weak regularization, $lambda = 0.01$, and tolerance $0$, so CG always r
 ) <fig:task8-maxiter>
 
 == Comparison of CG and MINRES
-
+CG and MINRES are compared in @fig:task9-conv and @fig:task9-relres. 
 #figure(
   stack(
     spacing: 0.5em,
@@ -474,29 +474,23 @@ We use a weak regularization, $lambda = 0.01$, and tolerance $0$, so CG always r
     table.hline(),
     [$lambda$], [*Method*], [*Iter.*], [*$M v$*], [*Sparse $m v$*], [*Time [s]*], [*Rel. res.*], [*Error*],
     table.hline(stroke: 0.5pt),
-    [$0.01$], [CG], [$300$], [$301$], [$1204$], [$15.9$], [$1.2 dot 10^(-6)$], [$0.212$],
-    [], [MINRES], [$300$], [$301$], [$1204$], [$15.1$], [$2.5 dot 10^(-7)$], [$0.211$],
-    [$0.05$], [CG], [$140$], [$141$], [$564$], [$11.7$], [$9.4 dot 10^(-9)$], [$0.126$],
-    [], [MINRES], [$130$], [$131$], [$524$], [$9.1$], [$9.2 dot 10^(-9)$], [$0.126$],
-    [$0.3$], [CG], [$39$], [$40$], [$160$], [$2.5$], [$6.9 dot 10^(-9)$], [$0.140$],
-    [], [MINRES], [$38$], [$39$], [$156$], [$2.6$], [$7.7 dot 10^(-9)$], [$0.140$],
+    [$0.01$], [CG], [$247$], [$248$], [$992$], [$2.68$], [$9.6 dot 10^(-9)$], [$0.032$],
+    [], [MINRES], [$217$], [$218$], [$872$], [$2.21$], [$9.9 dot 10^(-9)$], [$0.032$],
+    [$0.05$], [CG], [$66$], [$67$], [$268$], [$0.66$], [$9.8 dot 10^(-9)$], [$0.036$],
+    [], [MINRES], [$64$], [$65$], [$260$], [$0.7$], [$8.3 dot 10^(-9)$], [$0.036$],
+    [$0.3$], [CG], [$18$], [$19$], [$76$], [$0.18$], [$3.5 dot 10^(-9)$], [$0.07$],
+    [], [MINRES], [$17$], [$18$], [$72$], [$0.16$], [$9.5 dot 10^(-9)$], [$0.07$],
     table.hline(),
   ),
   caption: [CG and MINRES with tolerance $10^(-8)$ and at most $300$ iterations: iterations, products with $M$, sparse matrix-vector products, time, final relative residual and relative reconstruction error.],
 ) <tab:task9>
 
-*Convergence rate.* MINRES reaches the tolerance in slightly fewer iterations than CG ($130$ instead of $140$ for $lambda = 0.05$, $38$ instead of $39$ for $lambda = 0.3$), and for $lambda = 0.01$ it ends with a $5$ times smaller residual after $300$ iterations (@fig:task9-relres, @tab:task9). This is expected: MINRES minimizes exactly the residual we use to stop, while the CG residual is not minimized and decreases less smoothly. The reconstruction error and the objective, however, are almost the same for both methods (@fig:task9-conv). In the first $20$–$30$ iterations CG even has a slightly smaller error, and both end at the same error. The extra residual reduction of MINRES does not give a better image.
-
-*Matrix-vector products.* Both methods use one product with $M$ per iteration plus one for the initial residual, so $k + 1$ products with $M$, or $4(k + 1)$ sparse products, for $k$ iterations. The difference only comes from the number of iterations.
-
-*Computational time.* The time per iteration is about the same for both methods, since the four sparse products with $A$, $A^T$ ($3 dot 10^7$ nonzeros) and $L$, $L^T$ dominate the cost, not the vector operations. The measured times varied between runs by up to about $30 %$ (the computer was not idle), so the small differences in @tab:task9 are not significant.
-
-== Why CG is expected to outperform MINRES here
-- *CG is made for this kind of matrix.* $M$ is symmetric positive definite, which is exactly the case CG is designed for. MINRES is designed for symmetric indefinite systems, and we do not need that generality.
+== Why CG is expected to outperform MINRES
+$M$ is symmetric positive definite, which is exactly the case CG is designed for. MINRES is designed for symmetric indefinite systems.
+=AIBÖRJAR
 - *CG minimizes what we actually want to minimize.* As shown in Task 8, $norm(x - x_*)_M^2 = f(x) - f(x_*)$, so in every iteration CG gives the smallest possible value of the regularized least squares objective $f$ in the Krylov space. MINRES instead minimizes $norm(c - M x)_2$, which is only the size of the gradient of $f$. This is why MINRES wins in the residual plot, while CG is at least as good in the error and the objective.
 - *CG is cheaper per iteration.* MINRES does more work per iteration (the Lanczos recurrence and the Givens rotations) and stores more vectors ($v_(k-1), v_k, w, p_(k-1), p_k, x$ instead of $x, r, p, M p$ for CG). For our problem the matrix-vector products dominate, so the difference is small, but CG is never more expensive.
-- *Neither method fixes the conditioning.* Both search in the same Krylov space, so both are limited by the same $kappa(M)$, which for small $lambda$ is close to $kappa(A)^2$. This is why a preconditioner is needed to speed up the convergence (Task 10).
-
+=AISLUTAR
 = Summary
 We wanted to recover a sharp image $x_"true"$ from a blurred, noisy image $b = A x_"true" + e$. Solving $A x = b$ or the plain least squares problem amplifies the noise, because the blur matrix $A$ has many tiny singular values. Adding the regularization term $lambda^2 norm(L x)_2^2$, which penalizes differences between neighbouring pixels, damps the noise, and the minimizer satisfies the normal equations $(A^T A + lambda^2 L^T L) x = A^T b$. For a $300 times 300$ image this is a $90 thin 000 times 90 thin 000$ system, far too large for direct methods, but $A$ and $L$ are sparse (Task 6). The matrix is symmetric positive definite (Task 7), so CG can be used, and it only needs sparse matrix-vector products (Task 8). The best reconstruction is obtained with a good $lambda$ ($approx 0.05$) and a moderate tolerance. With a small $lambda$, stopping early acts as a regularizer. MINRES (Task 9) uses the same number of products per iteration and reaches a small residual slightly faster, but gives the same image, and CG is the natural method for this SPD problem.
 
