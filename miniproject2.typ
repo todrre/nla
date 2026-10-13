@@ -266,7 +266,7 @@ An iterative method starts from a guess $x_0$ (we use $x_0 = 0$, a black image) 
 $
   r_k = c - M x_k,
 $
-which is zero exactly at the solution. We stop when the relative residual $norm(r_k)_2 \/ norm(c)_2$ is below a tolerance $epsilon$ or after a maximum number of iterations.
+which is zero exactly at the solution. We stop when the relative residual $norm(r_k)_2 \/ norm(c)_2$ is below a tolerance or after a maximum number of iterations.
 
 In the first step the only direction we know is the residual $r_0$, so $x_1 = x_0 + alpha_0 r_0$ for some number $alpha_0$. In Krylov subspace methods a new direction is always found for each iteration, and the step length in that direction is chosen so $x_m$ is the best possible approximation that the method can find in $m$ steps. The subspace is built from $r_0$ and its products with $M$: first $M r_0$, then $M (M r_0) = M^2 r_0$, and so on. $x_m - x_0$ is therefore a linear combination of
 $
