@@ -92,9 +92,7 @@ The goal of part two is to recover a sharp image from a blurred one. The task bo
 
 #pagebreak()
 = Method
-== Iterative methods
-
-Direct methods like GSVD can be expensive for large image problems because they require a lot of storage and computation. Instead, we use iterative methods, which improve the solution step by step and mainly require matrix-vector products and a few stored vectors.
+Direct methods like GSVD can be expensive for large image problems because they require a lot of storage and computation. Instead, we use iterative methods. They work by improving the solution step by step and mainly require matrix-vector products and a few stored vectors.
 
 == Images as vectors
 
