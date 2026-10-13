@@ -371,11 +371,9 @@ $L$ is even sparser than $A$ (@fig:task6-spy-L). Since every row has exactly two
 ) <fig:task6-spy-L>
 
 == Influence of $beta$ and $epsilon$
-To see how the choice of parameters affects the sparsity, we vary $beta$ and $epsilon$ and count the nonzeros of $A$ (@tab:sparsity and @fig:task6-params).
+To see how the choice of parameters affects the sparsity, we vary $beta$ and $epsilon$ and count the nonzeros of $A$ (@tab:sparsity and @fig:task6-params). Since $beta$ controls how strongly pixels far away contribute, a larger $beta$ gives a narrower Gaussian. Fewer entries are then above $epsilon$, so $A$ becomes sparser.
 
-Since $beta$ controls how strongly pixels far away contribute, a larger $beta$ gives a narrower Gaussian. Fewer entries are then above $epsilon$, so $A$ becomes sparser.
-
-A larger $epsilon$ also makes $A$ sparser, since more entries are set to zero. The price is that $A$ becomes a worse approximation of the real blur, because more of the gaussian is cut away.
+A larger $epsilon$ also makes $A$ sparser, since more entries are set to zero. The price is that $A$ becomes a worse approximation of the real blur, because more of the Gaussian is cut away.
 
 #grid(
   columns: (auto, 1fr),
@@ -413,7 +411,7 @@ A larger $epsilon$ also makes $A$ sparser, since more entries are set to zero. T
 
 = Results
 == Influence of the regularization parameter $lambda$ on CG
-We use the tolerance $10^(-8)$, at most $300$ iterations, and $lambda in {0, 0.01, 0.05, 0.3, 1}$ The results are shown in @fig:task8-lambda. 
+We use the tolerance $10^(-8)$, at most $300$ iterations, and $lambda in {0, 0.01, 0.05, 0.3, 1}$. The results are shown in @fig:task8-lambda. 
 With small $lambda$, the relative residual does not shrink much, but the reconstruction error is smaller, except for $lambda$ = 0, where the error grows. For larger $lambda$ the residual shrinks faster, but the error is larger. 
 
 #figure(
@@ -426,7 +424,7 @@ With small $lambda$, the relative residual does not shrink much, but the reconst
 ) <fig:task8-lambda>
 
 == The stopping tolerance
-We fix $lambda = 0.05$ and at most $300$ iterations, and vary the tolerance (@fig:task8-tol).
+We fix $lambda = 0.05$ and at most $300$ iterations, and vary the tolerance. The results are shown in @fig:task8-tol. 
 
 #figure(
   stack(
