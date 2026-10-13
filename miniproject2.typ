@@ -155,6 +155,70 @@ $
 $ <eq:normal>
 This is the system we solve in the rest of the report.
 
+== Symmetric positive definite matrix
+Let $A in RR^(m times n)$ and $L in RR^(p times n)$.
+Assume that $lambda != 0$ and
+
+$
+  "rank"( mat(A; L) ) = n.
+$
+
+Using the matrix
+
+$
+  M = A^T A + lambda^2 L^T L.
+$
+
+we want to prove that $M$ is symmetric positive definite.
+
+A matrix is symmetric if $M^T = M$. Taking the transpose gives
+
+$
+  M^T & = (A^T A + lambda^2 L^T L)^T \
+      & =(A^T A)^T + lambda^2 (L^T L)^T \
+      & = A^T A + lambda^2 L^T L = M.
+$
+
+Therefore, $M$ is symmetric.
+
+A symmetric matrix $M$ is positive definite if
+
+$
+  z^T M z > 0
+  quad "for all" z != 0.
+$
+
+$
+  => z^T M z & = z^T (A^T A + lambda^2 L^T L) z \
+             & = z^T A^T A z + lambda^2 z^T L^T L z \
+             & = norm(A z)_2^2 + lambda^2 norm(L z)_2^2
+$
+
+
+Since squared Euclidean norms are always non-negative and
+$lambda != 0$ implies $lambda^2 > 0$ we get:
+
+
+$
+  z^T M z
+  = norm(A z)_2^2 + lambda^2 norm(L z)_2^2
+  >= 0.
+$
+
+To prove positive definiteness, we must show that
+the inequality is strict whenever $z != 0$. The assumption $"rank"( mat(A; L) ) = n$ means that the matrix obtained by stacking $A$ and $L$ has full column rank. Therefore, its null space contains only the zero vector:
+
+$
+  mat(A; L) z = 0
+  quad & "Only if" quad z = 0 \
+  => A z = 0 "and" L z = 0
+  quad & "Only if" quad z = 0
+$
+
+Now let $z != 0$. It follows that $A z$ and $L z$
+cannot both be zero at the same time. In other words at least on is greater than zero. Which means $M$ is symmetric positive definite.
+
+
 == Iterative Krylov subspace methods
 An iterative method starts from a guess $x_0$ (we use $x_0 = 0$, a black image) and improves it step by step, $x_1, x_2, dots$. To see how close $x_k$ is to solving $M x = c$ we use the residual.
 $
@@ -322,87 +386,6 @@ The memory and the cost of a matrix-vector product ($approx 2 thin "nnz"$ operat
   image("assets/task6_1_params.svg", width: 80%),
   caption: [Sparsity pattern of $A$ for different $beta$ (rows) and $epsilon$ (columns).],
 ) <fig:task6-params>
-
-= Task 7: Prove that the matrix is SPD
-We now know what we have to solve: the normal equations @eq:normal, $M x = c$ with $M = A^T A + lambda^2 L^T L$. Before choosing a method, we need to know what kind of matrix $M$ is, because the CG method only works for _symmetric positive definite_ (SPD) matrices. A matrix is symmetric if $M^T = M$, and positive definite if $z^T M z > 0$ for every vector $z != 0$. Geometrically, SPD means that the quadratic function $phi(x) = 1/2 x^T M x - c^T x$ is a "bowl" with exactly one lowest point, and that point is the solution of $M x = c$ (Task 8 explains why this matters for CG).
-
-Let $A in RR^(m times n)$ and $L in RR^(p times n)$.
-Assume that $lambda != 0$ and
-
-$
-  "rank"( mat(A; L) ) = n.
-$
-
-Define the matrix
-
-$
-  M = A^T A + lambda^2 L^T L.
-$
-
-We want to prove that $M$ is symmetric positive definite.
-
-*Is $M$ symmetric?*
-
-A matrix is symmetric if $M^T = M$. Taking the transpose gives
-
-$
-  M^T & = (A^T A + lambda^2 L^T L)^T \
-      & =(A^T A)^T + lambda^2 (L^T L)^T \
-      & = A^T A + lambda^2 L^T L = M.
-$
-
-Therefore, $M$ is symmetric.
-
-*Is $M$ positive definite?*
-
-A symmetric matrix $M$ is positive definite if
-
-$
-  z^T M z > 0
-  quad "for all" z != 0.
-$
-
-
-
-$
-  => z^T M z & = z^T (A^T A + lambda^2 L^T L) z \
-             & = z^T A^T A z + lambda^2 z^T L^T L z \
-             & = norm(A z)_2^2 + lambda^2 norm(L z)_2^2
-$
-
-
-Since squared Euclidean norms are always non-negative and
-$lambda != 0$ implies $lambda^2 > 0$ we get:
-
-
-$
-  z^T M z
-  = norm(A z)_2^2 + lambda^2 norm(L z)_2^2
-  >= 0.
-$
-
-To prove positive definiteness, we must show that
-the inequality is strict whenever $z != 0$. The assumption $"rank"( mat(A; L) ) = n$ means that the matrix obtained by stacking $A$ and $L$ has full column rank. Therefore, its null space contains only the zero vector:
-
-$
-  mat(A; L) z = 0
-  quad & "Only if" quad z = 0 \
-  => A z = 0 "and" L z = 0
-  quad & "Only if" quad z = 0
-$
-
-Now let $z != 0$. It follows that $A z$ and $L z$
-cannot both be zero at the same time. In other words at least on is greater than zero. Which means $M$ is symmetric positive definite.
-
-
-If M is symmetric positive definite, we can assume that in the absence of rounding errors, the CG algorithm will converge exactly in at most n iterations. (Theorem 3.9, NLA_iterative_methods)
-
-*Why this makes CG applicable.* CG finds the solution of $M x = c$ by walking downhill on the bowl $phi(x) = 1/2 x^T M x - c^T x$ (Task 8). This only works because $M$ is SPD:
-- the bowl has exactly one lowest point, and it is the solution $x_*$ (since $nabla phi(x) = M x - c$),
-- the step length in CG divides by $p^T M p$, which is positive for every direction $p != 0$,
-- $norm(z)_M = sqrt(z^T M z)$ is a norm, so "the smallest error in the $M$-norm", which CG minimizes, makes sense.
-
-For our image problem the assumption $"rank" mat(A; L) = n$ holds (see the end of the description of $L$ in Task 6), so $M$ is SPD for every $lambda != 0$ and CG can be used. For $lambda = 0$ we get $M = A^T A$, which in exact arithmetic is SPD when $A$ is invertible, but numerically it is singular because of the tiny singular values (introduction). We will see the effect of this in Task 8.1.
 
 == CG results (från AI)
 == The regularization parameter $lambda$
