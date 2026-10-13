@@ -127,8 +127,7 @@
 #counter(page).update(1)
 
 = Introduction
-== Goal
-The goal of part two is to recover a sharp image from a blurred one. The task boils down to a very large least squares problem, and with a dense matrix of that size the direct methods introduced earlier become too expensive. We therefore make the matrix artificially sparse and use iterative methods that are built for sparse problems. The deblurring problem is however ill-posed, so small amounts of noise can ruin the solution, and we show how regularization turns it into a solvable one.
+In this project we study iterative methods for solving linear systems. We apply these methods to to recover a sharp image from a blurred one. The task boils down to a very large least squares problem, and with a dense matrix of that size the direct methods introduced earlier become too expensive. We therefore make the matrix artificially sparse and use iterative methods that are built for sparse problems. The deblurring problem is, however, ill-posed, so small amounts of noise can ruin the solution, and we show how regularization turns it into a solvable one.
 
 
 #pagebreak()
@@ -185,10 +184,9 @@ where $lambda > 0$ balances the two terms: too small leaves noise, too large los
 == The normal equations
 We write out $f$ and set its gradient to zero:
 $
-        f(x) & = norm(A x - b)_2^2 + lambda^2 norm(L x)_2^2 \
-             & = (A x - b)^T (A x - b) + lambda^2 (L x)^T (L x) \
-             & = x^T (A^T A + lambda^2 L^T L) x - 2 x^T A^T b + b^T b, \
-  nabla f(x) & = 2 (A^T A + lambda^2 L^T L) x - 2 A^T b = 0.
+    f(x) & = norm(A x - b)_2^2 + lambda^2 norm(L x)_2^2 = (A x - b)^T (A x - b) + lambda^2 (L x)^T (L x) \
+             & = x^T (A^T A + lambda^2 L^T L) x - 2 x^T A^T b + b^T b \
+  mid(arrow.r.double) nabla f(x) & = 2 (A^T A + lambda^2 L^T L) x - 2 A^T b = 0.
 $ <eq:f-expanded>
 This gives the linear system
 $
