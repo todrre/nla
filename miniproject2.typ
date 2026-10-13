@@ -375,39 +375,45 @@ $L$ is even sparser than $A$ (@fig:task6-spy-L). Since every row has exactly two
 ) <fig:task6-spy-L>
 
 == Influence of $beta$ and $epsilon$
-@tab:sparsity and @fig:task6-params show how the number of nonzeros of $A$ depends on $beta$ and $epsilon$.
-- A larger $beta$ gives a narrower Gaussian, so fewer entries are above $epsilon$ and $A$ becomes sparser.
-- A larger $epsilon$ removes more entries, so $A$ also becomes sparser. The price is that $A$ is a worse approximation of the real blur, since we cut away more of the tails of the Gaussian.
+To see how the choice of parameters affects the sparsity, we vary $beta$ and $epsilon$ and count the nonzeros of $A$ (@tab:sparsity and @fig:task6-params).
 
-The memory and the cost of a matrix-vector product ($approx 2 thin "nnz"$ operations) both grow linearly with nnz. For our parameters, one product with $A$ costs about #sci(2 * t6A.nnz, digits: 2) operations instead of #sci(2 * t6A.rows * t6A.cols, digits: 2) for a dense $A$, about #thousands(t6A.rows * t6A.cols / t6A.nnz) times fewer. Since every iteration in Tasks 8–9 uses four sparse products, this is what makes the iterative methods fast. $L$ does not depend on $beta$ or $epsilon$, and it is so sparse that its cost is negligible compared to $A$.
+Since $beta$ controls how strongly pixels far away contribute, a larger $beta$ gives a narrower Gaussian. Fewer entries are then above $epsilon$, so $A$ becomes sparser.
 
-#figure(
-  table(
-    columns: 4,
-    align: (center, center, right, right),
-    stroke: none,
-    table.hline(),
-    [$beta$], [$epsilon$], [nnz$(A)$], [nonzero %],
-    table.hline(stroke: 0.5pt),
-    ..t6
-      .sweep
-      .map(r => (
-        thousands(r.beta),
-        pow10(r.eps),
-        sci(r.nnz),
-        num(100 * r.nnz / (t6A.rows * t6A.cols)),
-      ))
-      .flatten(),
-    table.hline(),
-  ),
-  caption: [Number of nonzeros of $A$ for different $beta$ and $epsilon$.],
-) <tab:sparsity>
+A larger $epsilon$ also makes $A$ sparser, since more entries are set to zero. The price is that $A$ becomes a worse approximation of the real blur, because more of the gaussian is cut away.
 
-#figure(
-  image("assets/task6_1_params.svg", width: 80%),
-  caption: [Sparsity pattern of $A$ for different $beta$ (rows) and $epsilon$ (columns).],
-) <fig:task6-params>
+#grid(
+  columns: (auto, 1fr),
+  gutter: 1.5em,
+  align: horizon,
+  [#figure(
+    table(
+      columns: 4,
+      align: (center, center, right, right),
+      stroke: none,
+      table.hline(),
+      [$beta$], [$epsilon$], [nnz$(A)$], [nonzero %],
+      table.hline(stroke: 0.5pt),
+      ..t6
+        .sweep
+        .map(r => (
+          thousands(r.beta),
+          pow10(r.eps),
+          sci(r.nnz),
+          num(100 * r.nnz / (t6A.rows * t6A.cols)),
+        ))
+        .flatten(),
+      table.hline(),
+    ),
+    caption: [Number of nonzeros of $A$ for different $beta$ and $epsilon$.],
+  ) <tab:sparsity>],
 
+  [#figure(
+    image("assets/task6_1_params.svg", width: 100%),
+    caption: [Sparsity pattern of $A$ for different $beta$ (rows) and $epsilon$ (columns).],
+  ) <fig:task6-params>],
+)
+
+#pagebreak()
 
 = Results
 == The regularization parameter $lambda$
