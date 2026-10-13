@@ -89,18 +89,12 @@
 == Goal
 The goal of part two is to recover a sharp image from a blurred one. The task boils down to a very large least squares problem, and with a dense matrix of that size the direct methods introduced earlier become too expensive. We therefore make the matrix artificially sparse and use iterative methods that are built for sparse problems. The deblurring problem is however ill-posed, so small amounts of noise can ruin the solution, and we show how regularization turns it into a solvable one.
 
-== Images as vectors
-A grayscale image with $n_1 times n_2$ pixels is a matrix $X in RR^(n_1 times n_2)$, where the entry $X_(i j)$ is the brightness of pixel $(i, j)$: $0$ is black and $1$ is white. The image in this case is resized to $300 times 300$ pixels, so it has $n = n_1 n_2 = 90 thin 000$ pixels. We write the image as one long vector by stacking its columns on top of each other: $x_"true" = "vec"(X) in RR^n$. Pixel $(i, j)$ ends up at position $i + (j - 1) n_1$ in $x$. Two pixels that are above each other in the image are therefore neighbours in $x$, while two pixels that are next to each other horizontally are $n_1$ positions apart. We model the blurred images as according to
-$
-  b = A x_"true" + e.
-$ <eq:model>
-where $A$ is the blur matrix, $b$ is the blurred image, and $e$ is Gaussian noise.
 
 #pagebreak()
 = Method
 
 == Iterative methods
-A direct method like GSVD works with dense matrices, which is is expensive in terms of storage and computing. Therefore, we use iterative methods to solve the deblurring problem. An iterative method starts uses sparse-marix products and only stores a few vectors.
+A direct method like GSVD works with dense matrices, which is is expensive in terms of storage and computing. Therefore, we use iterative methods to solve the deblurring problem. An iterative method uses sparse-marix products and only stores a few vectors.
 
 == Least squares
 Since $b$ contains noise, we do not ask for $A x = b$ exactly. We ask for the $x$ that fits the data best:
@@ -116,6 +110,48 @@ $
 $ <eq:tik>
 The parameter $lambda > 0$ decides how much smoothness counts: too small gives noise, too large gives blurry edges.
 
+== Iterative methods
+
+Direct methods like GSVD can be expensive for large image problems because they require a lot of storage and computation. Instead, we use iterative methods, which improve the solution step by step and mainly require matrix-vector products and a few stored vectors.
+
+== Images as vectors
+
+A grayscale image is a matrix $X in RR^(n_1 times n_2)$, where each entry represents a pixel brightness between $0$ (black) and $1$ (white). We represent the image as a single vector by stacking its columns:
+
+$
+  x_"true" = "vec"(X) in RR^n, quad n = n_1 n_2.
+$
+
+In our project, the image is resized to $300 times 300$ pixels, so $n = 90 000$. The goal is to recover this original sharp image from its blurred and noisy version $b$. We model the observation as
+
+$
+  b = A x_"true" + e,
+$ <eq:model>
+
+where $A$ is the blurring matrix and $e$ is the noise.
+
+== Least squares
+
+Since we observe $b$, but do not know the original image $x_"true"$ or the noise $e$, we want to estimate the sharp image. If there were no noise, we would have $A x = b$. In practice, noise makes an exact solution unreliable, so instead we find the image $x$ whose blurred version $A x$ is as close as possible to the observed image $b$. This gives the least squares problem:
+
+$
+  min_x norm(A x - b)_2^2.
+$
+
+The quantity $A x - b$ is the residual, and its squared norm measures the difference between the predicted blurred image and the observed image. However, since $b$ contains noise, minimizing the residual can also make the reconstruction fit the noise instead of the true image. Least squares alone does not prevent this, which is why we introduce regularization.
+
+== Regularization
+
+Least squares tries to fit the observed image $b$, but since $b$ contains noise, the reconstructed image $x$ may also contain noise. To reduce this effect, we add a penalty that encourages the reconstructed image to be smooth.
+
+The matrix $L$ measures differences between neighbouring pixels (Task 6), so $norm(L x)_2^2$ is large when neighbouring pixels differ a lot. We therefore minimize
+
+$
+  f(x) = underbrace(norm(A x - b)_2^2, "fit the observed data") + underbrace(lambda^2 norm(L x)_2^2, "encourage smoothness").
+$ <eq:tik>
+
+The first term is the least squares objective, which makes the blurred reconstruction $A x$ fit the observed image $b$. The second term penalizes roughness in the reconstructed image. The parameter $lambda > 0$ controls the balance between these goals: if $lambda$ is too small, the reconstruction may contain noise; if it is too large, important details and edges may be lost.
+
 == The normal equations
 We write out $f$ and set its gradient to zero:
 $
@@ -129,12 +165,6 @@ $
   M x = c, quad M = A^T A + lambda^2 L^T L, quad c = A^T b.
 $ <eq:normal>
 This is the system we solve in the rest of the report.
-
-$
-  M x = A^T (A x) + lambda^2 L^T (L x)
-$ <eq:matvec>
-
-== Krylov subspace
 
 == Iterative Krylov subspace methods
 An iterative method starts from a guess $x_0$ (we use $x_0 = 0$, a black image) and improves it step by step, $x_1, x_2, dots$. To see how close $x_k$ is to solving $M x = c$ we use the _residual_
@@ -222,7 +252,7 @@ We cannot form the dense $A$ and then threshold it, since it does not fit in mem
 *Sparse storage.* We store $A$ in the CSR (compressed sparse row) format, which only stores the nonzero entries: for each nonzero its value ($8$ bytes) and its column index ($4$ bytes), plus one pointer per row ($4$ bytes) telling where the row starts.
 
 == The data $b$
-The data is generated by @eq:model, $b = A x_"true" + e$, where every entry of $e$ is an independent standard normal number times $sigma = 0.01$. Since the pixel values lie in $[0, 1]$, this is noise of about $1 %$ of the brightness range. The true image and $b$ are shown in @fig:task8-lambda.
+The data is generated by !!!!eq:model, $b = A x_"true" + e$, where every entry of $e$ is an independent standard normal number times $sigma = 0.01$. Since the pixel values lie in $[0, 1]$, this is noise of about $1 %$ of the brightness range. The true image and $b$ are shown in @fig:task8-lambda.
 
 == The regularization matrix $L$
 In one dimension, the first-order difference matrix
@@ -417,7 +447,7 @@ Our implementation (`cg` in the notebook) is the standard CG algorithm:
 
 The new direction $p_(k+1)$ is the steepest descent direction $r_(k+1)$, corrected by a multiple of the old direction so that it becomes $M$-conjugate to all earlier directions. (The coefficient $mu_k$ is usually called $beta_k$, but we use $mu_k$ to avoid confusion with the blur parameter $beta$.)
 
-*Using the sparsity.* The task requires that we do not form any matrix-matrix products. The only place where $M$ appears is $q_k = M p_k$, which we compute with @eq:matvec as $A^T (A p_k) + lambda^2 L^T (L p_k)$, that is, four sparse matrix-vector products. In the code this function is wrapped in a SciPy `LinearOperator`, so `M @ p` inside `cg` calls it. $M$ itself, and in particular the much denser $A^T A$, is never formed.
+*Using the sparsity.* The task requires that we do not form any matrix-matrix products. The only place where $M$ appears is $q_k = M p_k$, which we compute with eq:matvec as $A^T (A p_k) + lambda^2 L^T (L p_k)$, that is, four sparse matrix-vector products. In the code this function is wrapped in a SciPy `LinearOperator`, so `M @ p` inside `cg` calls it. $M$ itself, and in particular the much denser $A^T A$, is never formed.
 
 *Convergence speed.* For CG there is the classical bound
 $
