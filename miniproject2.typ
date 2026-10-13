@@ -90,7 +90,7 @@
 The goal of the whole project is to recover the sharp image from the blurred one. This section explains, step by step, how this goal turns into a linear algebra problem, why that problem is hard, and why it leads us to regularization, least squares and iterative methods.
 
 == Images as vectors
-A grayscale image with $n_1 times n_2$ pixels is a matrix $X in RR^(n_1 times n_2)$, where the entry $X_(i j)$ is the brightness of pixel $(i, j)$: $0$ is black and $1$ is white. The image in this case is resized to $300 times 300$ pixels, so it has $n = n_1 n_2 = 90 thin 000$ pixels. We write the image as one long vector by stacking its columns on top of each other: $x_"true" = "vec"(X) in RR^n$. Pixel $(i, j)$ ends up at position $i + (j - 1) n_1$ in $x$. Two pixels that are above each other in the image are therefore neighbours in $x$, while two pixels that are next to each other horizontally are $n_1$ positions apart. We model the blurred images as according to 
+A grayscale image with $n_1 times n_2$ pixels is a matrix $X in RR^(n_1 times n_2)$, where the entry $X_(i j)$ is the brightness of pixel $(i, j)$: $0$ is black and $1$ is white. The image in this case is resized to $300 times 300$ pixels, so it has $n = n_1 n_2 = 90 thin 000$ pixels. We write the image as one long vector by stacking its columns on top of each other: $x_"true" = "vec"(X) in RR^n$. Pixel $(i, j)$ ends up at position $i + (j - 1) n_1$ in $x$. Two pixels that are above each other in the image are therefore neighbours in $x$, while two pixels that are next to each other horizontally are $n_1$ positions apart. We model the blurred images as according to
 $
   b = A x_"true" + e.
 $ <eq:model>
@@ -100,7 +100,7 @@ where $A$ is the blur matrix, $b$ is the blurred image, and $e$ is Gaussian nois
 = Method
 
 == Iterative methods
-A direct method like GSVD works with dense matrices, which is is expensive in terms of storage and computing. Therefore, we use iterative methods to solve the deblurring problem. An iterative method starts uses sparse-marix products and only stores a few vectors. 
+A direct method like GSVD works with dense matrices, which is is expensive in terms of storage and computing. Therefore, we use iterative methods to solve the deblurring problem. An iterative method starts uses sparse-marix products and only stores a few vectors.
 
 == Least squares
 Since $b$ contains noise, we do not ask for $A x = b$ exactly. We ask for the $x$ that fits the data best:
@@ -141,23 +141,13 @@ $
 $
 which is zero exactly at the solution. We stop when the relative residual $norm(r_k)_2 \/ norm(c)_2$ is below a tolerance `tol`, or after `max_iter` steps.
 
-Which $x_k$ can such a method reach? In the first step the only direction we know is the residual $r_0$, so $x_1 = x_0 + alpha_0 r_0$ for some number $alpha_0$. Every new step computes one more product with $M$, which gives one new direction: first $M r_0$, then $M (M r_0) = M^2 r_0$, and so on. After $k$ steps, $x_k - x_0$ is therefore a linear combination of
-$
-  r_0, quad M r_0, quad M^2 r_0, quad dots, quad M^(k-1) r_0.
-$
-The set of all such combinations is called the _Krylov subspace_,
+In the first step the only direction we know is the residual $r_0$, so $x_1 = x_0 + alpha_0 r_0$ for some number $alpha_0$. In krylov methods a new direction is always found for each iteration. And the length we walk in that direction is chosen optimally, so $x_k$ is the best possible approximation that the method can find in $k$ steps.
+
+For every new step the space in wich we pick the direction grows by one dimension. The standard krylov sub space is build from the residual $r_0$ and its products with $M$: first $M r_0$, then $M (M r_0) = M^2 r_0$, and so on. After $k$ steps, $x_k - x_0$ is therefore a linear combination of
 $
   cal(K)_k (M, r_0) = "span"{r_0, M r_0, dots, M^(k-1) r_0},
 $
-so $x_k$ always lies in $x_0 + cal(K)_k (M, r_0)$.
 
-*A growing vector space.* $cal(K)_k (M, r_0)$ is a vector space, and it grows by one dimension per iteration:
-$
-  cal(K)_1 subset cal(K)_2 subset cal(K)_3 subset dots
-$
-Every iteration of a Krylov method does two things:
-+ it extends the space with one new basis vector, using one product with $M$,
-+ it chooses the optimal $x_k$ in the current space $x_0 + cal(K)_k (M, r_0)$.
 Since every space contains the previous one, the optimal $x_k$ can only get better from one iteration to the next. After at most $n$ iterations the space contains the exact solution, but in practice far fewer are enough.
 
 *A good basis.* In theory $r_0, M r_0, M^2 r_0, dots$ is a basis of the space, but in practice it is a bad one. Multiplying by $M$ again and again turns every vector towards the eigenvector of the largest eigenvalue (as in the power method), so these vectors become almost parallel and computing with them is unstable. Krylov methods therefore build a better basis of the same space, one vector per iteration, where every new vector is orthogonal to the earlier ones:
@@ -597,7 +587,7 @@ We wanted to recover a sharp image $x_"true"$ from a blurred, noisy image $b = A
 
 
 = Task 11
-SUPERAISVAR:LSQR can solve the regularized least-squares problem 
+SUPERAISVAR:LSQR can solve the regularized least-squares problem
 \(\min_x \|Ax-b\|_2^2+\lambda^2\|Lx\|_2^2\) by rewriting it as an ordinary least-squares problem with the augmented matrix \(\widetilde A=\begin{bmatrix}A\\\lambda L\end{bmatrix}\) and vector \(\widetilde b=\begin{bmatrix}b\\0\end{bmatrix}\). It requires only products with \(\widetilde A\) and \(\widetilde A^T\), which can be computed using \(A,A^T,L,L^T\). Therefore, LSQR avoids explicitly forming \(A^TA\) and \(L^TL\), reducing memory requirements and avoiding the additional rounding errors and potential sparsity loss associated with forming the normal equations.
 CG can also avoid explicitly forming the normal equations by applying matrix-vector products through \(A^T(Av)+\lambda^2L^T(Lv)\). However, it solves the resulting normal-equation system, whose condition number is the square of that of the augmented matrix: \(\kappa_2(\widetilde A^T\widetilde A)=\kappa_2(\widetilde A)^2\), assuming full column rank. LSQR works directly with the augmented least-squares operator and generally has better numerical behavior for ill-conditioned problems. Both methods have similar per-iteration costs, typically requiring one forward and one transpose matrix-vector product, and can be effective for large sparse systems.
 Regularization can improve conditioning by reducing the influence of poorly determined solution components, although it introduces a trade-off between fitting the data and limiting the solution norm. Neither LSQR nor CG guarantees an accurate solution for severely ill-conditioned problems, and both can exhibit semiconvergence, where later iterations begin fitting noise. In practice, LSQR is generally the preferred starting point for large, ill-conditioned least-squares problems, while CG may be appropriate when an effective preconditioner or an existing normal-equation solver is available. Early stopping and suitable regularization are important for obtaining a stable, meaningful solution.
