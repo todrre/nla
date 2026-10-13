@@ -440,8 +440,8 @@ We use the tolerance $10^(-8)$, at most $300$ iterations, and $lambda in {0, 0.0
 #figure(
   stack(
     spacing: 0.5em,
-    image("8.1.png", width: 100%),
-    image("8.1.graph.png", width: 100%),
+    image("assets/task8_1_images.svg", width: 100%),
+    image("assets/task8_1_convergence.svg", width: 100%),
   ),
   caption: [Influence of $lambda$ on the CG reconstruction and convergence.],
 ) <fig:task8-lambda>
@@ -459,8 +459,8 @@ We fix $lambda = 0.05$ and at most $300$ iterations, and vary the tolerance (@fi
 #figure(
   stack(
     spacing: 0.5em,
-    image("8.2.png", width: 100%),
-    image("8.2.graph.png", width: 100%),
+    image("assets/task8_2_images.svg", width: 100%),
+    image("assets/task8_2_convergence.svg", width: 100%),
   ),
   caption: [Influence of the tolerance on the CG reconstruction and convergence ($lambda = 0.05$).],
 ) <fig:task8-tol>
@@ -476,8 +476,8 @@ We use a weak regularization, $lambda = 0.01$, and `tol` $= 0$, so CG always run
 #figure(
   stack(
     spacing: 0.5em,
-    image("8.3.png", width: 100%),
-    image("8.3.graph.png", width: 100%),
+    image("assets/task8_3_images.svg", width: 100%),
+    image("assets/task8_3_convergence.svg", width: 100%),
   ),
   caption: [Influence of the maximum number of iterations on the CG reconstruction and convergence ($lambda = 0.01$).],
 ) <fig:task8-maxiter>
