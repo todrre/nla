@@ -110,7 +110,10 @@
 #let sci(x, digits: 3) = {
   let e = calc.floor(calc.log(x))
   let m = sigs(x / calc.pow(10.0, e), digits: digits)
-  if m.starts-with("10") { e += 1; m = sigs(1.0, digits: digits) }
+  if m.starts-with("10") {
+    e += 1
+    m = sigs(1.0, digits: digits)
+  }
   if float(m) == 1.0 and digits == 1 { mth("10^(" + str(e) + ")") } else { mth(m + " dot 10^(" + str(e) + ")") }
 }
 #let pow10(x) = sci(x, digits: 1)
@@ -184,8 +187,8 @@ where $lambda > 0$ balances the two terms: too small leaves noise, too large los
 == The normal equations
 We write out $f$ and set its gradient to zero:
 $
-    f(x) & = norm(A x - b)_2^2 + lambda^2 norm(L x)_2^2 = (A x - b)^T (A x - b) + lambda^2 (L x)^T (L x) \
-             & = x^T (A^T A + lambda^2 L^T L) x - 2 x^T A^T b + b^T b \
+  f(x) & = norm(A x - b)_2^2 + lambda^2 norm(L x)_2^2 = (A x - b)^T (A x - b) + lambda^2 (L x)^T (L x) \
+  & = x^T (A^T A + lambda^2 L^T L) x - 2 x^T A^T b + b^T b \
   mid(arrow.r.double) nabla f(x) & = 2 (A^T A + lambda^2 L^T L) x - 2 A^T b = 0.
 $ <eq:f-expanded>
 This gives the linear system
@@ -330,11 +333,15 @@ $
   (A x)_i = sum_j h^2 K(s_i, t_j) x_j.
 $
 
+<<<<<<< HEAD
 Finally, since $norm(s - t)_2^2 = (s_1 - t_1)^2 + (s_2 - t_2)^2$, the Gaussian kernel factors into one kernel for the $x$-direction and one for the $y$-direction. We can therefore build one-dimensional blur matrices $A_1$ and $A_2$ for each direction, and the Kronecker product gives $A$ for the whole image:
 $
   A = A_2 times.o A_1.
 $
 The order of the factors follows from $x = "vec"(X)$ stacking the columns of $X$: $A_1 in RR^(n_1 times n_1)$ blurs every column (vertical direction) and $A_2 in RR^(n_2 times n_2)$ every row (horizontal direction), so $A x = "vec"(A_1 X A_2^T)$.
+=======
+Finnaly as the problem is 2 dimensional and our A now works in one dimension, a kronecker product between the x direction and y direction gives us a A for the whole image.$ A = A_2 times.o A_1. $
+>>>>>>> 4ef11ef (rerun)
 
 $A$ is now a dense $90 thin 000 times 90 thin 000$ matrix, which requires about $65$ GB of memory. This is unreasonably large, and pixels far apart barely affect each other anyway. So instead of storing $A$ as a dense matrix, entries below a threshold can be set to zero and the matrix can be stored in CSR (compressed sparse row) format.
 
@@ -367,6 +374,30 @@ $L$ is even sparser than $A$ (@fig:task6-spy-L). Since every row has exactly two
   caption: [Sparsity pattern of $L$. Left: all of $L$. Middle: the first rows of the top half. Right: the first $3 n_1$ rows of the bottom half.],
 ) <fig:task6-spy-L>
 
+== Memory
+A dense $m times n$ matrix stores every entry as an $8$ byte number, so it needs $8 m n$ bytes. In CSR format a matrix needs $12 thin "nnz" + 4 (m + 1)$ bytes, where nnz is the number of nonzeros. @tab:memory shows that dense storage is impossible on a normal computer, while the sparse matrices fit easily.
+
+#figure(
+  table(
+    columns: 4,
+    align: (left, right, right, right),
+    stroke: none,
+    table.hline(),
+    [*Matrix*], [*Size*], [*Dense*], [*Sparse (CSR)*],
+    table.hline(stroke: 0.5pt),
+    ..(([$A$], t6A), ([$L$], t6L))
+      .map(((name, M)) => (
+        name,
+        [#thousands(M.rows) $times$ #thousands(M.cols)],
+        mem(M.dense_bytes),
+        mem(M.sparse_bytes),
+      ))
+      .flatten(),
+    table.hline(),
+  ),
+  caption: [Memory needed for dense and sparse storage of $A$ and $L$ ($beta = #t6beta$, $epsilon = #t6eps$).],
+) <tab:memory>
+
 == Influence of $beta$ and $epsilon$
 @tab:sparsity and @fig:task6-params show how the number of nonzeros of $A$ depends on $beta$ and $epsilon$.
 - A larger $beta$ gives a narrower Gaussian, so fewer entries are above $epsilon$ and $A$ becomes sparser.
@@ -382,9 +413,15 @@ The memory and the cost of a matrix-vector product ($approx 2 thin "nnz"$ operat
     table.hline(),
     [$beta$], [$epsilon$], [nnz$(A)$], [nonzero %],
     table.hline(stroke: 0.5pt),
-    ..t6.sweep.map(r => (
-      thousands(r.beta), pow10(r.eps), sci(r.nnz), num(100 * r.nnz / (t6A.rows * t6A.cols)),
-    )).flatten(),
+    ..t6
+      .sweep
+      .map(r => (
+        thousands(r.beta),
+        pow10(r.eps),
+        sci(r.nnz),
+        num(100 * r.nnz / (t6A.rows * t6A.cols)),
+      ))
+      .flatten(),
     table.hline(),
   ),
   caption: [Number of nonzeros of $A$ for different $beta$ and $epsilon$.],
