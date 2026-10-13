@@ -156,20 +156,16 @@ $ <eq:normal>
 This is the system we solve in the rest of the report.
 
 == Iterative Krylov subspace methods
-An iterative method starts from a guess $x_0$ (we use $x_0 = 0$, a black image) and improves it step by step, $x_1, x_2, dots$. To see how close $x_k$ is to solving $M x = c$ we use the _residual_
+An iterative method starts from a guess $x_0$ (we use $x_0 = 0$, a black image) and improves it step by step, $x_1, x_2, dots$. To see how close $x_k$ is to solving $M x = c$ we use the residual.
 $
   r_k = c - M x_k,
 $
-which is zero exactly at the solution. We stop when the relative residual $norm(r_k)_2 \/ norm(c)_2$ is below a tolerance `tol`, or after `max_iter` steps.
+which is zero exactly at the solution. We stop when the relative residual $norm(r_k)_2 \/ norm(c)_2$ is below a tolerance $epsilon$ or after a maximum number of iterations.
 
-In the first step the only direction we know is the residual $r_0$, so $x_1 = x_0 + alpha_0 r_0$ for some number $alpha_0$. In krylov methods a new direction is always found for each iteration. And the length we walk in that direction is chosen optimally, so $x_k$ is the best possible approximation that the method can find in $k$ steps.
-
-For every new step the space in wich we pick the direction grows by one dimension. The standard krylov sub space is build from the residual $r_0$ and its products with $M$: first $M r_0$, then $M (M r_0) = M^2 r_0$, and so on. After $k$ steps, $x_k - x_0$ is therefore a linear combination of
+In the first step the only direction we know is the residual $r_0$, so $x_1 = x_0 + alpha_0 r_0$ for some number $alpha_0$. In Krylov subspace methods a new direction is always found for each iteration, and the step length in that direction is chosen so $x_m$ is the best possible approximation that the method can find in $m$ steps. The subspace is built from $r_0$ and its products with $M$: first $M r_0$, then $M (M r_0) = M^2 r_0$, and so on. $x_m - x_0$ is therefore a linear combination of
 $
-  cal(K)_k (M, r_0) = "span"{r_0, M r_0, dots, M^(k-1) r_0},
+  cal(K)_m (M, r_0) = "span"{r_0, M r_0, dots, M^(m-1) r_0},
 $
-
-Since every space contains the previous one, the optimal $x_k$ can only get better from one iteration to the next. After at most $n$ iterations the space contains the exact solution, but in practice far fewer are enough. Krylov methods therefore build a better basis of the same space, one vector per iteration, where every new vector is orthogonal to the earlier ones.
 
 The two methods used in this project are Conjugate Gradient (CG) and Minimum Residual (MINRES).
 
