@@ -96,9 +96,11 @@ $
 $ <eq:model>
 where $A$ is the blur matrix, $b$ is the blurred image, and $e$ is Gaussian noise.
 
-== Iterative methods
+#pagebreak()
 = Method
-A direct method like GSVD works with full matrices. That is too much both storing and computing. Therefore, we use iterative methods to solve the deblurring problem. An iterative method starts uses sparse-marix products and only stores a few vectors. 
+
+== Iterative methods
+A direct method like GSVD works with dense matrices, which is is expensive in terms of storage and computing. Therefore, we use iterative methods to solve the deblurring problem. An iterative method starts uses sparse-marix products and only stores a few vectors. 
 
 == Least squares
 Since $b$ contains noise, we do not ask for $A x = b$ exactly. We ask for the $x$ that fits the data best:
@@ -132,9 +134,6 @@ $
   M x = A^T (A x) + lambda^2 L^T (L x)
 $ <eq:matvec>
 
-
-#pagebreak()
-= Method
 == Iterative Krylov subspace methods
 An iterative method starts from a guess $x_0$ (we use $x_0 = 0$, a black image) and improves it step by step, $x_1, x_2, dots$. To see how close $x_k$ is to solving $M x = c$ we use the _residual_
 $
