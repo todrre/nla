@@ -234,39 +234,33 @@ In this task we build the concrete $x_"true"$, $A$, $b$ and $L$ for our image an
 The image from the course page is resized to $300 times 300$ pixels, converted to grayscale and scaled to values in $[0, 1]$. This gives $X_"true"$, and $x_"true" = "vec"(X_"true") in RR^(90 thin 000)$.
 
 == The blur matrix $A$
-The continuous blur model (1.8) in the project description is
+To blur the image the vector $x_"true"$ is multiplied by a blurring matrix $A$. 
+$A$ is given by the continuous blur model (1.8)
 $
   b(s) = integral K(s, t) x(t) dif t + e(s),
 $
-which says that the brightness at the point $s$ of the blurred image is a weighted integral of the sharp image. The weight $K(s, t)$, called the _point spread function_ (PSF), tells how much light from the point $t$ ends up at the point $s$. We use the Gaussian kernel (1.9) with $B = beta I$:
+where $b(s)$ is the final blurred image, $e(s)$ represents the noise which is gaussian noise in this case.
+$K(s,t)$ is called _point spread function_ and weighs how each pixel is affected by all other pixels in the image, we use the Gaussian kernel (1.9), with $B = beta I$, where $beta$ controls how much pixels far away affect:
 $
   K(s, t) = c e^(-beta norm(s - t)_2^2).
 $
-Points close to each other get a large weight and points far apart almost zero. The parameter $beta$ controls the width: the Gaussian has standard deviation $1 \/ sqrt(2 beta) approx 0.022$ for $beta = 1000$, which is about $3.4$ pixels. The constant $c = beta \/ pi$ makes the weights sum to one, so that blurring does not change the overall brightness.
 
-*Discretization.* We place the image on the square $[-1, 1]^2$. Each pixel is a small square with side $h = 2 \/ 300$, and its position $t_j$ is its midpoint. Replacing the integral by a sum over the pixels (each pixel contributes its value times its area $h^2$, the box rule from Task 5) gives
-$
-  (A x)_i = sum_j h^2 K(s_i, t_j) x_j, quad "so" quad a_(i j) = h^2 c e^(-beta norm(s_i - t_j)_2^2).
-$
-Pixels outside the image are not part of the sum, which is the same as assuming that everything outside the image is black (zero boundary conditions). This is why the blurred image gets a dark frame (@fig:task8-lambda).
+To make sure $K(s,t)$ does not change the overall brightness, c is chosen as $c = beta \/ pi$
 
-*Kronecker structure.* The Gaussian splits into a vertical and a horizontal part,
+As the problem is discrete the integral can be approximated by the sum, where $h$ represents the width of each pixel
+
 $
-  e^(-beta norm(s - t)_2^2) = e^(-beta (s_1 - t_1)^2) e^(-beta (s_2 - t_2)^2),
+  (A x)_i = sum_j h^2 K(s_i, t_j) x_j
 $
-so a 2D blur is the same as first blurring every column of the image vertically and then every row horizontally. With the one-dimensional blur matrices (built exactly like $A$ in Task 5)
-$
-  (A_1)_(i k) = h sqrt(beta / pi) e^(-beta (t_i - t_k)^2) in RR^(n_1 times n_1), quad A_2 in RR^(n_2 times n_2) "built the same way",
-$
-blurring the columns of $X$ is $A_1 X$ and blurring its rows is $X A_2^T$, so the blurred image is $A_1 X A_2^T$. Using the standard rule $"vec"(A_1 X A_2^T) = (A_2 times.o A_1) "vec"(X)$ we get
-$
+
+Finnaly as the problem is 2 dimensional and our A now works in one dimension, a kronecker product between the x direction and y direction gives us a A for the whole image.$
   A = A_2 times.o A_1.
 $
-Here $times.o$ is the _Kronecker product_: $A_2 times.o A_1$ is the block matrix whose block $(k, l)$ is $(A_2)_(k l) A_1$. So $A$ is an $n_2 times n_2$ grid of blocks, each of size $n_1 times n_1$.
 
-*Thresholding.* The Gaussian is never exactly zero, so $A$ is a dense $90 thin 000 times 90 thin 000$ matrix with $8.1 dot 10^9$ entries, about $65$ GB. But the weights of pixels far apart are tiny: for $beta = 1000$, pixels more than about $10$ pixels apart get a weight below $10^(-4)$. We therefore set all entries $|a_(i j)| < epsilon$ to zero, so every pixel only depends on its neighbours and $A$ becomes sparse.
+A is now a dense $90 thin 000 times 90 thin 000$
 
-We cannot form the dense $A$ and then threshold it, since it does not fit in memory. Instead we use that $a_(i j) = (A_1)_(i_1 k_1) (A_2)_(i_2 k_2)$ is a product of an entry of $A_1$ and an entry of $A_2$. An entry of $A_1$ that is so small that even multiplied by the largest entry of $A_2$ it is below $epsilon$ can never give an entry of $A$ above $epsilon$, so it is removed already in $A_1$ (and the same for $A_2$). We then form the sparse Kronecker product and remove the remaining entries below $epsilon$. The result is the same as thresholding $A$ directly.
+*Thresholding.* The Gaussian is never exactly zero, so $A$ is a dense  matrix with $8.1 dot 10^9$ entries, about $65$ GB. But the weights of pixels far apart are tiny: for $beta = 1000$, pixels more than about $10$ pixels apart get a weight below $10^(-4)$. We therefore set all entries $|a_(i j)| < epsilon$ to zero, so every pixel only depends on its neighbours and $A$ becomes sparse.
+
 
 *Sparse storage.* We store $A$ in the CSR (compressed sparse row) format, which only stores the nonzero entries: for each nonzero its value ($8$ bytes) and its column index ($4$ bytes), plus one pointer per row ($4$ bytes) telling where the row starts.
 
