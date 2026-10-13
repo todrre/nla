@@ -95,10 +95,31 @@ The goal of part two is to recover a sharp image from a blurred one. The task bo
 Direct methods like GSVD need too much storage and computation for large image problems. We instead use iterative methods, which refine the solution step by step using mainly matrix-vector products and a few stored vectors.
 
 == Images as vectors
+#grid(
+  columns: (2fr, 1fr),
+  gutter: 1em,
+  align: top,
 
-A grayscale image can be interpreted as a matrix $X in RR^(n_1 times n_2)$, where the pixel brightnesses is represented by, $0$ (black) to $1$ (white). By stacking its columns, $X$ becomes the vector $x_"true" = "vec"(X) in RR^n, n = n_1 n_2.$
+  [
+    A grayscale image is a matrix $X in RR^(n_1 times n_2)$ of pixel brightnesses from $0$ (black) to $1$ (white). Stacking its columns gives
 
-By using this method the original image is resized to $300 times 300$, which gives $n = 90 000$.
+    $x_"true" = "vec"(X) in RR^n, quad n = n_1 n_2.$
+
+    We resize the image to $300 times 300$ pixels, so $n = 90 000$. The goal is to recover the sharp image $x_"true"$ from the blurred and noisy observation
+
+    $b = A x_"true" + e,$ <eq:model>
+
+    where $A$ is the blurring matrix and $e$ is the noise.
+  ],
+
+  [
+    #v(-1em)
+    #figure(
+      image("true_image.png", width: 100%),
+      caption: [Original $X_"true"$ image],
+    )
+  ],
+)
 
 == Least squares
 
@@ -162,10 +183,8 @@ We can use the update rule
 $
   x_(m+1) = x_m + alpha_m p_m,
 $
-where $p_m$ is the search direction and $alpha_m$ is the step length. We choose $p_m$ to be A-orthogonal to all previous search directions. $p_0$ is chosen to be the initial residual $r_0 = c - M x_0$. The search direction is updated according to 
-$
-  p_(m+1) = r_(m+1) + beta_m p_m,
-$, where
+where $p_m$ is the search direction and $alpha_m$ is the step length. We choose $p_m$ to be A-orthogonal to all previous search directions. $p_0$ is chosen to be the initial residual $r_0 = c - M x_0$. The search direction is updated according to
+$ p_(m+1) = r_(m+1) + beta_m p_m, $, where
 $
   beta_m = (r_(m+1)^T r_(m+1)) / (r_m^T r_m)
 $
@@ -178,7 +197,9 @@ When M is SPD, CG converges in at most n iterations, and the error decreases mon
 
 
 In this project, CG is implemented in Python, adapted from the algorithm in @nla_iter.
-= Task 6: Building the problem
+
+
+= Building the problem
 In this task we build the concrete $x_"true"$, $A$, $b$ and $L$ for our image and store $A$ and $L$ as sparse matrices. We use the parameters in @tab:params.
 
 #figure(
@@ -573,3 +594,5 @@ Regularization can improve conditioning by reducing the influence of poorly dete
 // ---------------------------------------------------------------------------
 #set heading(numbering: none)
 #bibliography("references.bib", title: "References")
+
+
