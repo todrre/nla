@@ -423,8 +423,8 @@ With small $lambda$, the relative residual does not shrink much, but the reconst
   caption: [Influence of $lambda$ on the CG reconstruction and convergence.],
 ) <fig:task8-lambda>
 
-== The stopping tolerance
-We fix $lambda = 0.05$ and at most $300$ iterations, and vary the tolerance. The results are shown in @fig:task8-tol. 
+== Influence of the stopping tolerance on CG
+We fix $lambda = 0.05$ and at most $300$ iterations, and vary the tolerance. The results are shown in @fig:task8-tol. We see that the error and residual decrease with the tolerance, but the error levels off at for tolerances below $0.001$. This means it is unnecessary to use a lower tolerance.
 
 #figure(
   stack(
@@ -435,13 +435,8 @@ We fix $lambda = 0.05$ and at most $300$ iterations, and vary the tolerance. The
   caption: [Influence of the tolerance on the CG reconstruction and convergence ($lambda = 0.05$).],
 ) <fig:task8-tol>
 
-CG is deterministic and always starts from $x_0 = 0$, so all runs follow the same iterates. The tolerance only decides where a run stops (the dots in the plots).
-- `tol` $= 10^(-2)$ stops after $4$ iterations with a blurry image (error $0.155$).
-- From `tol` $= 10^(-4)$ ($38$ iterations) the error stays at $0.126$. Smaller tolerances cost more iterations ($89$ and $140$) without making the image better.
-- The error and the objective level off after about $30$ iterations, so a moderate tolerance is enough. Solving the normal equations to high accuracy is pointless when the equations themselves only describe the image up to the noise.
-
-== The maximum number of iterations
-We use a weak regularization, $lambda = 0.01$, and `tol` $= 0$, so CG always runs exactly `max_iter` iterations (@fig:task8-maxiter).
+== The maximum number of iterations for CG
+We use a weak regularization, $lambda = 0.01$, and tolerance $0$, so CG always runs exactly `max_iter` iterations The results are shown in @fig:task8-maxiter. We see a similar pattern as for the tolerance: the error decreases with the number of iterations, but levels off for `max_iter` higher than 20. 
 
 #figure(
   stack(
@@ -452,25 +447,7 @@ We use a weak regularization, $lambda = 0.01$, and `tol` $= 0$, so CG always run
   caption: [Influence of the maximum number of iterations on the CG reconstruction and convergence ($lambda = 0.01$).],
 ) <fig:task8-maxiter>
 
-= Results
-Preconditioner, om använda cg bevara spd
-$L^{-1}A L^{-T}y=L^{-1}y=L^{-1}b, y=L^{T}x$
-$M=LL^{T}$ är preconditioner då cholesky bevarar spd.
-With weak regularization the number of iterations itself acts as a regularizer. This is called _semi-convergence_:
-- The error first decreases and is smallest around $20$–$25$ iterations ($0.128$, about as good as $lambda = 0.05$).
-- After that the error grows to $0.21$ and ringing artifacts appear, even though the residual and the objective keep decreasing.
-
-The reason is the SVD picture from the introduction. The first Krylov vectors are dominated by the directions with large singular values, which are smooth and carry the real image. The directions with small singular values, where the noise is amplified, only enter the Krylov space after many iterations. Stopping early therefore keeps the noisy directions out of the solution. A small residual does not mean a good reconstruction: with a small $lambda$, stopping early gives a better image.
-
-== Summary of the convergence behaviour
-- The objective decreases in every iteration, as it must, since CG minimizes it over a growing space.
-- The residual decreases (not always monotonically), and the rate is set by $kappa(M)$: a larger $lambda$ gives faster convergence.
-- The reconstruction error is what we actually care about. It levels off (good $lambda$) or even grows again (small $lambda$), so the best reconstruction is obtained by a good $lambda$ combined with a moderate tolerance.
-
-
-== Experiment setup
-Both methods start from $x_0 = 0$, solve $M x = c$ with the same operator, and stop when the relative residual $norm(c - M x_k)_2 \/ norm(c)_2$ is below the tolerance, so the stopping criteria are identical. We count the products with $M$ by wrapping the operator in a counter. Every product with $M$ is four sparse products ($A$, $A^T$, $L$, $L^T$). The timed runs record nothing during the iterations (computing the error and objective would dominate the time), and each run is timed three times, keeping the fastest.
-
+== Comparison of CG and MINRES
 
 #figure(
   stack(
