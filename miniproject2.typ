@@ -314,6 +314,9 @@ $
 
 Like CG, MINRES needs one matrix-vector product per iteration and a fixed number of stored vectors. CG minimizes the error in the $M$-norm, MINRES the residual in the 2-norm.
 
+== LSQR
+
+
 == Blur matrix $A$
 To blur the image, the vector $x_"true"$ is multiplied by a blurring matrix $A$.
 $A$ comes from the continuous blur model (1.8)
@@ -411,8 +414,8 @@ A larger $epsilon$ also makes $A$ sparser, since more entries are set to zero. T
 
 = Results
 == Influence of the regularization parameter $lambda$ on CG
-We use the tolerance $10^(-8)$, at most $300$ iterations, and $lambda in {0, 0.01, 0.05, 0.3, 1}$. The results are shown in @fig:task8-lambda. 
-With small $lambda$, the relative residual does not shrink much, but the reconstruction error is smaller, except for $lambda$ = 0, where the error grows. For larger $lambda$ the residual shrinks faster, but the error is larger. 
+We use the tolerance $10^(-8)$, at most $300$ iterations, and $lambda in {0, 0.01, 0.05, 0.3, 1}$. The results are shown in @fig:task8-lambda.
+With small $lambda$, the relative residual does not shrink much, but the reconstruction error is smaller, except for $lambda$ = 0, where the error grows. For larger $lambda$ the residual shrinks faster, but the error is larger.
 
 #figure(
   stack(
@@ -436,7 +439,7 @@ We fix $lambda = 0.05$ and at most $300$ iterations, and vary the tolerance. The
 ) <fig:task8-tol>
 
 == The maximum number of iterations for CG
-We use a weak regularization, $lambda = 0.01$, and tolerance $0$, so CG always runs exactly `max_iter` iterations The results are shown in @fig:task8-maxiter. We see a similar pattern as for the tolerance: the error decreases with the number of iterations, but levels off for `max_iter` higher than 20. 
+We use a weak regularization, $lambda = 0.01$, and tolerance $0$, so CG always runs exactly `max_iter` iterations The results are shown in @fig:task8-maxiter. We see a similar pattern as for the tolerance: the error decreases with the number of iterations, but levels off for `max_iter` higher than 20.
 
 #figure(
   stack(
