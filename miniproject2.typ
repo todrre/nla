@@ -86,29 +86,19 @@
 #counter(page).update(1)
 
 = Introduction
-== The problem: undoing a blur
+== Goal
 The goal of the whole project is to recover the sharp image from the blurred one. This section explains, step by step, how this goal turns into a linear algebra problem, why that problem is hard, and why it leads us to regularization, least squares and iterative methods.
 
 == Images as vectors
-A grayscale image with $n_1 times n_2$ pixels is a matrix $X in RR^(n_1 times n_2)$, where the entry $X_(i j)$ is the brightness of pixel $(i, j)$: $0$ is black and $1$ is white. The image in this caseis resized to $300 times 300$ pixels, so it has $n = n_1 n_2 = 90 thin 000$ pixels. To use linear algebra (matrices acting on vectors) we write the image as one long vector, by stacking its columns on top of each other:$x = "vec"(X) in RR^n$. Pixel $(i, j)$ ends up at position $i + (j - 1) n_1$ in $x$. Two pixels that are above each other in the image are therefore neighbours in $x$, while two pixels that are next to each other horizontally are $n_1$ positions apart.
-
-We call the sharp image $x_"true"$. In a real application it is unknown. Here we know it, which lets us measure how good a reconstruction is.
-
-== The blurring model
+A grayscale image with $n_1 times n_2$ pixels is a matrix $X in RR^(n_1 times n_2)$, where the entry $X_(i j)$ is the brightness of pixel $(i, j)$: $0$ is black and $1$ is white. The image in this case is resized to $300 times 300$ pixels, so it has $n = n_1 n_2 = 90 thin 000$ pixels. We write the image as one long vector by stacking its columns on top of each other: $x_"true" = "vec"(X) in RR^n$. Pixel $(i, j)$ ends up at position $i + (j - 1) n_1$ in $x$. Two pixels that are above each other in the image are therefore neighbours in $x$, while two pixels that are next to each other horizontally are $n_1$ positions apart. We model the blurred images as according to 
 $
   b = A x_"true" + e.
 $ <eq:model>
+where $A$ is the blur matrix, $b$ is the blurred image, and $e$ is Gaussian noise.
 
-== Why we cannot simply solve $A x = b$
-The naive solution $x = A^(-1) b$ gives
-$
-  x = x_"true" + A^(-1) e.
-$
-With the SVD $A = U Sigma V^T$ the error term is
-$
-  A^(-1) e = sum_(i=1)^n (u_i^T e) / sigma_i v_i.
-$ <eq:noise-amp>
-A small singular value $sigma_i$ makes the term $(u_i^T e) \/ sigma_i$ large, so the noise is amplified. For our blur about $93 %$ of the singular values are below the noise level $sigma = 0.01$, so $x$ is mostly noise. Such a matrix is called _ill-conditioned_: its condition number $kappa(A) = sigma_1 \/ sigma_n$ is huge.
+== Iterative methods
+= Method
+A direct method like GSVD works with full matrices. That is too much both storing and computing. Therefore, we use iterative methods to solve the deblurring problem. An iterative method starts uses sparse-marix products and only stores a few vectors. 
 
 == Least squares
 Since $b$ contains noise, we do not ask for $A x = b$ exactly. We ask for the $x$ that fits the data best:
@@ -138,12 +128,10 @@ $
 $ <eq:normal>
 This is the system we solve in the rest of the report.
 
-== Why iterative methods
-$M$ is $90 thin 000 times 90 thin 000$. A direct method (like the GSVD in Miniproject 1) works with full matrices. That is too much both storing and computing. An iterative method starts from a guess and improves it step by step, and it only uses $M$ through products $M v$. These are cheap, since
 $
-  M v = A^T (A v) + lambda^2 L^T (L v)
+  M x = A^T (A x) + lambda^2 L^T (L x)
 $ <eq:matvec>
-is just four sparse matrix-vector products. We never have to form $M$.
+
 
 #pagebreak()
 = Method
@@ -596,14 +584,15 @@ Both methods start from $x_0 = 0$, solve $M x = c$ with the same operator, and s
 We wanted to recover a sharp image $x_"true"$ from a blurred, noisy image $b = A x_"true" + e$. Solving $A x = b$ or the plain least squares problem amplifies the noise, because the blur matrix $A$ has many tiny singular values. Adding the regularization term $lambda^2 norm(L x)_2^2$, which penalizes differences between neighbouring pixels, damps the noise, and the minimizer satisfies the normal equations $(A^T A + lambda^2 L^T L) x = A^T b$. For a $300 times 300$ image this is a $90 thin 000 times 90 thin 000$ system, far too large for direct methods, but $A$ and $L$ are sparse (Task 6). The matrix is symmetric positive definite (Task 7), so CG can be used, and it only needs sparse matrix-vector products (Task 8). The best reconstruction is obtained with a good $lambda$ ($approx 0.05$) and a moderate tolerance. With a small $lambda$, stopping early acts as a regularizer. MINRES (Task 9) uses the same number of products per iteration and reaches a small residual slightly faster, but gives the same image, and CG is the natural method for this SPD problem.
 
 
-// ---------------------------------------------------------------------------
-//  References
-// ---------------------------------------------------------------------------
-#set heading(numbering: none)
-#bibliography("references.bib", title: "References")
-
 = Task 11
 SUPERAISVAR:LSQR can solve the regularized least-squares problem 
 \(\min_x \|Ax-b\|_2^2+\lambda^2\|Lx\|_2^2\) by rewriting it as an ordinary least-squares problem with the augmented matrix \(\widetilde A=\begin{bmatrix}A\\\lambda L\end{bmatrix}\) and vector \(\widetilde b=\begin{bmatrix}b\\0\end{bmatrix}\). It requires only products with \(\widetilde A\) and \(\widetilde A^T\), which can be computed using \(A,A^T,L,L^T\). Therefore, LSQR avoids explicitly forming \(A^TA\) and \(L^TL\), reducing memory requirements and avoiding the additional rounding errors and potential sparsity loss associated with forming the normal equations.
 CG can also avoid explicitly forming the normal equations by applying matrix-vector products through \(A^T(Av)+\lambda^2L^T(Lv)\). However, it solves the resulting normal-equation system, whose condition number is the square of that of the augmented matrix: \(\kappa_2(\widetilde A^T\widetilde A)=\kappa_2(\widetilde A)^2\), assuming full column rank. LSQR works directly with the augmented least-squares operator and generally has better numerical behavior for ill-conditioned problems. Both methods have similar per-iteration costs, typically requiring one forward and one transpose matrix-vector product, and can be effective for large sparse systems.
 Regularization can improve conditioning by reducing the influence of poorly determined solution components, although it introduces a trade-off between fitting the data and limiting the solution norm. Neither LSQR nor CG guarantees an accurate solution for severely ill-conditioned problems, and both can exhibit semiconvergence, where later iterations begin fitting noise. In practice, LSQR is generally the preferred starting point for large, ill-conditioned least-squares problems, while CG may be appropriate when an effective preconditioner or an existing normal-equation solver is available. Early stopping and suitable regularization are important for obtaining a stable, meaningful solution.
+
+
+// ---------------------------------------------------------------------------
+//  References
+// ---------------------------------------------------------------------------
+#set heading(numbering: none)
+#bibliography("references.bib", title: "References")
