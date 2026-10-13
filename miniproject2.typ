@@ -208,32 +208,7 @@ $
 
 Like CG, MINRES needs one matrix-vector product per iteration and a fixed number of stored vectors. CG minimizes the error in the $M$-norm, MINRES the residual in the 2-norm.
 
-#pagebreak()
-== Building the problem
-
-In this task we build the concrete $x_"true"$, $A$, $b$ and $L$ for our image and store $A$ and $L$ as sparse matrices. We use the parameters in @tab:params.
-
-#figure(
-  table(
-    columns: 3,
-    align: (left, center, left),
-    stroke: none,
-    table.hline(),
-    [*Parameter*], [*Value*], [*Meaning*],
-    table.hline(stroke: 0.5pt),
-    [$n_1 = n_2$], [$300$], [image size in pixels],
-    [$beta$], [$1000$], [width of the blur (larger $beta$ = less blur)],
-    [$epsilon$], [$10^(-4)$], [entries $|a_(i j)| < epsilon$ are set to zero],
-    [$sigma$], [$10^(-2)$], [noise level],
-    table.hline(),
-  ),
-  caption: [Parameters used in Tasks 6–9 unless stated otherwise.],
-) <tab:params>
-
-== The image
-The image from the course page is resized to $300 times 300$ pixels, converted to grayscale and scaled to values in $[0, 1]$. This gives $X_"true"$, and $x_"true" = "vec"(X_"true") in RR^(90 thin 000)$.
-
-== The blur matrix $A$
+== Blur matrix $A$
 To blur the image the vector $x_"true"$ is multiplied by a blurring matrix $A$. 
 $A$ is given by the continuous blur model (1.8)
 $
