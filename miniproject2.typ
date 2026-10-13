@@ -323,7 +323,7 @@ $
   K(s, t) = c e^(-beta norm(s - t)_2^2).
 $
 
-To make sure that $K(s,t)$ does not change the overall brightness, $c$ is chosen as $c = beta \/ pi$, so that $integral K(s, t) dif t = 1$.
+To make sure that $K(s,t)$ does not change the overall brightness, $c$ is chosen as $c = beta \/ pi$.
 
 Since the image is discrete, the integral is approximated by a sum, where $h$ is the width of each pixel:
 $
@@ -395,7 +395,8 @@ The memory and the cost of a matrix-vector product ($approx 2 thin "nnz"$ operat
   caption: [Sparsity pattern of $A$ for different $beta$ (rows) and $epsilon$ (columns).],
 ) <fig:task6-params>
 
-== CG results (från AI)
+
+= Results
 == The regularization parameter $lambda$
 We use the tolerance $10^(-8)$, at most $300$ iterations, and $lambda in {0, 0.01, 0.05, 0.3, 1}$ (@fig:task8-lambda).
 
@@ -444,7 +445,7 @@ We use a weak regularization, $lambda = 0.01$, and `tol` $= 0$, so CG always run
   caption: [Influence of the maximum number of iterations on the CG reconstruction and convergence ($lambda = 0.01$).],
 ) <fig:task8-maxiter>
 
-= Task 10
+= Results
 Preconditioner, om använda cg bevara spd
 $L^{-1}A L^{-T}y=L^{-1}y=L^{-1}b, y=L^{T}x$
 $M=LL^{T}$ är preconditioner då cholesky bevarar spd.
@@ -463,7 +464,7 @@ The reason is the SVD picture from the introduction. The first Krylov vectors ar
 == Experiment setup
 Both methods start from $x_0 = 0$, solve $M x = c$ with the same operator, and stop when the relative residual $norm(c - M x_k)_2 \/ norm(c)_2$ is below the tolerance, so the stopping criteria are identical. We count the products with $M$ by wrapping the operator in a counter. Every product with $M$ is four sparse products ($A$, $A^T$, $L$, $L^T$). The timed runs record nothing during the iterations (computing the error and objective would dominate the time), and each run is timed three times, keeping the fastest.
 
-== Results
+
 #figure(
   stack(
     spacing: 0.5em,
