@@ -503,7 +503,7 @@ $
   beta_k = (tilde(r)_(k+1)^T tilde(r)_(k+1)) / (tilde(r)_k^T tilde(r)_k), quad
   tilde(p)_(k+1) = tilde(r)_(k+1) + beta_k tilde(p)_k,
 $
-and the solution is recovered from $x = C^(-T) tilde(x)$. In practice, $tilde(M)$ is never formed. With $r = C tilde(r)$ and $p = C^(-T) tilde(p)$, the same iteration can be carried out in the original variables, where every iteration only needs one product with $M$ and one solve with $P$ (two triangular solves).
+and the solution is recovered from $x = C^(-T) tilde(x)$. In practice, $tilde(M)$ is never formed. With $r = C tilde(r)$ and $p = C^(-T) tilde(p)$, the same operations can be carried out in the original coordinate system, where every iteration only needs one product with $M$.
 
 We compare CG and PCG, both starting from $x_0 = 0$ and stopping when the relative residual is below $10^(-6)$ or after $500$ iterations (@fig:task10, @tab:task10).
 
