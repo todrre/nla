@@ -194,7 +194,7 @@ $ <eq:normal>
 This is the system we solve in the rest of the report.
 
 == Symmetric positive definite matrix
-Let $A in RR^(n times n)$ and $L in RR^(p times n)$.
+Let $A in RR^(m times n)$ and $L in RR^(p times n)$.
 Assume that $lambda != 0$ and
 
 $
