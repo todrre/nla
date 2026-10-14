@@ -145,13 +145,9 @@ Direct methods like GSVD need too much storage and computation for large image p
   [
     A grayscale image is a matrix $X in RR^(n_1 times n_2)$ of pixel brightnesses from $0$ (black) to $1$ (white). Stacking its columns gives
 
-    $x_"true" = "vec"(X) in RR^n, quad n = n_1 n_2.$
+    $x_"true" = "vec"(X) in RR^n, quad n = n_1 n_2$
 
-    We resize the image to $300 times 300$ pixels, so $n = 90 000$. The goal is to recover the sharp image $x_"true"$ from the blurred and noisy observation
-
-    $b = A x_"true" + e,$ <eq:model>
-
-    where $A$ is the blurring matrix and $e$ is the noise.
+    We resize the image to $300 times 300$ pixels, so $n = 90 000$. The goal is to recover the sharp image $x_"true"$ from the blurred and noisy observation $b = A x_"true" + e$ <eq:model> where $A$ is the blurring matrix and $e$ is the noise.
   ],
 
   [
@@ -168,7 +164,7 @@ Direct methods like GSVD need too much storage and computation for large image p
 Only $b$ is known, not $x_"true"$ or $e$. Without noise we could solve $A x = b$, but noise makes an exact solution unreliable, so we solve
 
 $
-  min_x norm(A x - b)_2^2,
+  min_x norm(A x - b)_2^2
 $
 
 which minimizes the residual $A x - b$, the difference between the predicted blurred image and $b$. Least squares alone also fits the noise in $b$, which motivates regularization.
@@ -178,7 +174,7 @@ which minimizes the residual $A x - b$, the difference between the predicted blu
 To suppress noise, we penalize non-smooth reconstructions. $L$ takes differences between neighbouring pixels, so $norm(L x)_2^2$ is large when neighbours differ strongly. We minimize
 
 $
-  f(x) = underbrace(norm(A x - b)_2^2, "fit the observed data") + underbrace(lambda^2 norm(L x)_2^2, "encourage smoothness"),
+  f(x) = underbrace(norm(A x - b)_2^2, "fit the observed data") + underbrace(lambda^2 norm(L x)_2^2, "encourage smoothness")
 $ <eq:tik>
 
 where $lambda > 0$ balances the two terms: too small leaves noise, too large loses details and edges.
@@ -189,11 +185,11 @@ We write out $f$ and set its gradient to zero:
 $
   f(x) & = norm(A x - b)_2^2 + lambda^2 norm(L x)_2^2 = (A x - b)^T (A x - b) + lambda^2 (L x)^T (L x) \
   & = x^T (A^T A + lambda^2 L^T L) x - 2 x^T A^T b + b^T b \
-  mid(arrow.r.double) nabla f(x) & = 2 (A^T A + lambda^2 L^T L) x - 2 A^T b = 0.
+  mid(arrow.r.double) nabla f(x) & = 2 (A^T A + lambda^2 L^T L) x - 2 A^T b = 0
 $ <eq:f-expanded>
 This gives the linear system
 $
-  M x = c, quad M = A^T A + lambda^2 L^T L, quad c = A^T b.
+  M x = c, quad M = A^T A + lambda^2 L^T L, quad c = A^T b
 $ <eq:normal>
 This is the system we solve in the rest of the report.
 
@@ -202,7 +198,7 @@ Let $A in RR^(n times n)$ and $L in RR^(p times n)$.
 Assume that $lambda != 0$ and
 
 $
-  "rank"( mat(A; L) ) = n.
+  "rank"( mat(A; L) ) = n
 $
 
 Using
@@ -211,14 +207,14 @@ A matrix is symmetric if $M^T = M$. Taking the transpose gives
 
 $
   M^T & = (A^T A + lambda^2 L^T L)^T && =(A^T A)^T + lambda^2 (L^T L)^T \
-      & = A^T A + lambda^2 L^T L     && = M.
+      & = A^T A + lambda^2 L^T L     && = M
 $
 
-Therefore, *$M$ is symmetric*. A symmetric matrix is positive definite if
+Therefore, $M$ is symmetric. A symmetric matrix is positive definite if
 
 $
   z^T M z > 0
-  quad "for all" z != 0.
+  quad "for all" z != 0
 $
 
 $
@@ -235,7 +231,7 @@ $lambda != 0$ implies $lambda^2 > 0$ we get:
 $
   z^T M z
   = norm(A z)_2^2 + lambda^2 norm(L z)_2^2
-  >= 0.
+  >= 0
 $
 
 To prove positive definiteness, we must show that
@@ -249,19 +245,19 @@ $
 $
 
 Now let $z != 0$. It follows that $A z$ and $L z$
-cannot both be zero at the same time. In other words at least on is greater than zero. Which means *$M$ is symmetric positive definite*.
+cannot both be zero at the same time. In other words at least on is greater than zero. Which means $M$ is symmetric positive definite.
 
 
 == Iterative Krylov subspace methods
 An iterative method starts from a guess $x_0$ (we use $x_0 = 0$, a black image) and improves it step by step, $x_1, x_2, dots$. To see how close $x_k$ is to solving $M x = c$ we use the residual.
 $
-  r_k = c - M x_k,
+  r_k = c - M x_k
 $
 which is zero exactly at the solution. We stop when the relative residual $norm(r_k)_2 \/ norm(c)_2$ is below a tolerance or after a maximum number of iterations.
 
 In the first step the only direction we know is the residual $r_0$, so $x_1 = x_0 + alpha_0 r_0$ for some number $alpha_0$. In Krylov subspace methods a new direction is always found for each iteration, and the step length in that direction is chosen so $x_k$ is the best possible approximation that the method can find in $k$ steps. The subspace is built from $r_0$ and its products with $M$: first $M r_0$, then $M (M r_0) = M^2 r_0$, and so on. $x_k - x_0$ is therefore a linear combination of
 $
-  cal(K)_k (M, r_0) = "span"{r_0, M r_0, dots, M^(k-1) r_0},
+  cal(K)_k (M, r_0) = "span"{r_0, M r_0, dots, M^(k-1) r_0}
 $
 
 The two methods used in this project are Conjugate Gradient (CG) and Minimum Residual (MINRES).
@@ -269,7 +265,7 @@ The two methods used in this project are Conjugate Gradient (CG) and Minimum Res
 == Conjugate Gradient
 Since $M$ is SPD, solving $M x = c$ is the same as minimizing
 $
-  phi.alt(x) = 1/2 x^T M x - c^T x.
+  phi.alt(x) = 1/2 x^T M x - c^T x
 $
 
 We can use the update rule
@@ -283,7 +279,7 @@ $
 $
 and
 $
-  alpha_k = (r_k^T r_k) / (p_k^T M p_k).
+  alpha_k = (r_k^T r_k) / (p_k^T M p_k)
 $
 
 When M is SPD, CG converges in at most n iterations, and the error decreases monotonically. The convergence rate depends on the condition number of M, which is improved by regularization.
@@ -294,13 +290,13 @@ In this project, CG is implemented in Python, adapted from the algorithm in @nla
 == MINRES
 MINRES (minimal residual) solves $M x = c$ for symmetric $M$, which unlike in CG does not need to be positive definite. In iteration $k$ it chooses
 $
-  x_k = op("arg min", limits: #true)_(x in x_0 + cal(K)_k (M, r_0)) norm(c - M x)_2,
+  x_k = op("arg min", limits: #true)_(x in x_0 + cal(K)_k (M, r_0)) norm(c - M x)_2
 $
 the iterate with the smallest residual in the Krylov subspace
 
 Since $M$ is symmetric, the Lanczos process reduces this to a small least squares problem with a tridiagonal matrix. This problem is solved with Givens rotations, which gives the short update
 $
-  x_(k+1) = x_k + tau_k p_k.
+  x_(k+1) = x_k + tau_k p_k
 $
 
 Like CG, MINRES needs one matrix-vector product per iteration and a fixed number of stored vectors. CG minimizes the error in the $M$-norm, MINRES the residual in the 2-norm.
@@ -311,11 +307,11 @@ LSQR @paige1982lsqr @lsqr_se is an iterative method for least squares problems $
 
 The regularized problem @eq:tik becomes an ordinary least squares problem if we stack $A$ on top of $lambda L$:
 $
-  norm(mat(A; lambda L) x - mat(b; 0))_2^2 = norm(A x - b)_2^2 + lambda^2 norm(L x)_2^2.
+  norm(mat(A; lambda L) x - mat(b; 0))_2^2 = norm(A x - b)_2^2 + lambda^2 norm(L x)_2^2
 $
 So we apply LSQR with $hat(A) = mat(A; lambda L)$ and $hat(b) = mat(b; 0)$. In each iteration LSQR only multiplies a vector by $hat(A)$ and by $hat(A)^T$:
 $
-  hat(A) v = mat(A v; lambda L v), quad hat(A)^T mat(u_1; u_2) = A^T u_1 + lambda L^T u_2.
+  hat(A) v = mat(A v; lambda L v), quad hat(A)^T mat(u_1; u_2) = A^T u_1 + lambda L^T u_2
 $
 These are sparse matrix-vector products so no matrix-matrix product is needed.
 
@@ -326,24 +322,24 @@ LSQR and CG solve the same problem, since $M = hat(A)^T hat(A)$ and $c = hat(A)^
 To blur the image, the vector $x_"true"$ is multiplied by a blurring matrix $A$.
 $A$ comes from the continuous blur model (1.8)
 $
-  b(s) = integral K(s, t) x(t) dif t + e(s),
+  b(s) = integral K(s, t) x(t) dif t + e(s)
 $
 where $b(s)$ is the blurred image and $e(s)$ is the noise, which in this case is Gaussian.
 $K(s,t)$ is called the _point spread function_ and determines how much each pixel is affected by every other pixel in the image. We use the Gaussian kernel (1.9) with $B = beta I$, where $beta$ controls how strongly pixels far away contribute:
 $
-  K(s, t) = c e^(-beta norm(s - t)_2^2).
+  K(s, t) = c e^(-beta norm(s - t)_2^2)
 $
 
 To make sure that $K(s,t)$ does not change the overall brightness, $c$ is chosen as $c = beta \/ pi$.
 
 Since the image is discrete, the integral is approximated by a sum, where $h$ is the width of each pixel:
 $
-  (A x)_i = sum_j h^2 K(s_i, t_j) x_j.
+  (A x)_i = sum_j h^2 K(s_i, t_j) x_j
 $
 
 Finally, since $norm(s - t)_2^2 = (s_1 - t_1)^2 + (s_2 - t_2)^2$, the Gaussian kernel factors into one kernel for the $x$-direction and one for the $y$-direction. We can therefore build one-dimensional blur matrices $A_1$ and $A_2$ for each direction, and the Kronecker product gives $A$ for the whole image:
 $
-  A = A_2 times.o A_1.
+  A = A_2 times.o A_1
 $
 The order of the factors follows from $x = "vec"(X)$ stacking the columns of $X$: $A_1 in RR^(n_1 times n_1)$ blurs every column (vertical direction) and $A_2 in RR^(n_2 times n_2)$ every row (horizontal direction), so $A x = "vec"(A_1 X A_2^T)$.
 
@@ -353,13 +349,13 @@ $A$ is now a dense #thousands(t6A.rows) $times$ #thousands(t6A.cols) matrix, whi
 == The regularization matrix $L$
 To penalize images that are not smooth, we need a matrix $L$ that measures how much neighbouring pixels differ. We start in one dimension, where the first-order difference matrix
 $
-  L_1 = mat(1, -1; , 1, -1; , , dots.down, dots.down; , , , 1, -1) in RR^((n_1 - 1) times n_1), quad (L_1 v)_i = v_i - v_(i+1),
+  L_1 = mat(1, -1; , 1, -1; , , dots.down, dots.down; , , , 1, -1) in RR^((n_1 - 1) times n_1), quad (L_1 v)_i = v_i - v_(i+1)
 $
 computes the difference between each pair of neighbouring entries of a vector $v$.
 
 Since $x_"true"$ stacks the columns of $X$, applying $L_1$ to every column gives all vertical differences, likewise $L_2$ applied to every row gives all horizontal differences. Adding them together gives L:
 $
-  L = L_G = mat(I_(n_2) times.o L_1; L_2 times.o I_(n_1)) in RR^(#thousands(t6L.rows) times #thousands(t6L.cols)).
+  L = L_G = mat(I_(n_2) times.o L_1; L_2 times.o I_(n_1)) in RR^(#thousands(t6L.rows) times #thousands(t6L.cols))
 $
 Given that $L x = 0$ is only attained when all pixels have the same value, and $A x = 0$ when we have the original image exactly we can conclude that $"rank" mat(A; L) = n$
 
