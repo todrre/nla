@@ -198,7 +198,7 @@ $ <eq:normal>
 This is the system we solve in the rest of the report.
 
 == Symmetric positive definite matrix
-Let $A in RR^(m times n)$ and $L in RR^(p times n)$.
+Let $A in RR^(n times n)$ and $L in RR^(p times n)$.
 Assume that $lambda != 0$ and
 
 $
@@ -268,9 +268,9 @@ $
 $
 which is zero exactly at the solution. We stop when the relative residual $norm(r_k)_2 \/ norm(c)_2$ is below a tolerance or after a maximum number of iterations.
 
-In the first step the only direction we know is the residual $r_0$, so $x_1 = x_0 + alpha_0 r_0$ for some number $alpha_0$. In Krylov subspace methods a new direction is always found for each iteration, and the step length in that direction is chosen so $x_m$ is the best possible approximation that the method can find in $m$ steps. The subspace is built from $r_0$ and its products with $M$: first $M r_0$, then $M (M r_0) = M^2 r_0$, and so on. $x_m - x_0$ is therefore a linear combination of
+In the first step the only direction we know is the residual $r_0$, so $x_1 = x_0 + alpha_0 r_0$ for some number $alpha_0$. In Krylov subspace methods a new direction is always found for each iteration, and the step length in that direction is chosen so $x_k$ is the best possible approximation that the method can find in $k$ steps. The subspace is built from $r_0$ and its products with $M$: first $M r_0$, then $M (M r_0) = M^2 r_0$, and so on. $x_k - x_0$ is therefore a linear combination of
 $
-  cal(K)_m (M, r_0) = "span"{r_0, M r_0, dots, M^(m-1) r_0},
+  cal(K)_k (M, r_0) = "span"{r_0, M r_0, dots, M^(k-1) r_0},
 $
 
 The two methods used in this project are Conjugate Gradient (CG) and Minimum Residual (MINRES).
@@ -283,16 +283,16 @@ $
 
 We can use the update rule
 $
-  x_(m+1) = x_m + alpha_m p_m
+  x_(k+1) = x_k + alpha_k p_k
 $
-where $p_m$ is the search direction and $alpha_m$ is the step length. We choose $p_m$ to be A-orthogonal to all previous search directions. $p_0$ is chosen to be the initial residual $r_0 = c - M x_0$. The search direction is updated according to
-$ p_(m+1) = r_(m+1) + beta_m p_m $ where
+where $p_k$ is the search direction and $alpha_k$ is the step length. We choose $p_k$ to be $M$-orthogonal to all previous search directions. $p_0$ is chosen to be the initial residual $r_0 = c - M x_0$. The search direction is updated according to
+$ p_(k+1) = r_(k+1) + beta_k p_k $ where
 $
-  beta_m = (r_(m+1)^T r_(m+1)) / (r_m^T r_m)
+  beta_k = (r_(k+1)^T r_(k+1)) / (r_k^T r_k)
 $
 and
 $
-  alpha_m = (r_m^T r_m) / (p_m^T M p_m).
+  alpha_k = (r_k^T r_k) / (p_k^T M p_k).
 $
 
 When M is SPD, CG converges in at most n iterations, and the error decreases monotonically. The convergence rate depends on the condition number of M, which is improved by regularization.
@@ -301,15 +301,15 @@ In this project, CG is implemented in Python, adapted from the algorithm in @nla
 
 
 == MINRES
-MINRES (minimal residual) solves $M x = c$ for symmetric $M$, which unlike in CG does not need to be positive definite. In iteration $m$ it chooses
+MINRES (minimal residual) solves $M x = c$ for symmetric $M$, which unlike in CG does not need to be positive definite. In iteration $k$ it chooses
 $
-  x_m = op("arg min", limits: #true)_(x in x_0 + cal(K)_m (M, r_0)) norm(c - M x)_2,
+  x_k = op("arg min", limits: #true)_(x in x_0 + cal(K)_k (M, r_0)) norm(c - M x)_2,
 $
 the iterate with the smallest residual in the Krylov subspace
 
 Since $M$ is symmetric, the Lanczos process reduces this to a small least squares problem with a tridiagonal matrix. This problem is solved with Givens rotations, which gives the short update
 $
-  x_(m+1) = x_m + tau_m p_m.
+  x_(k+1) = x_k + tau_k p_k.
 $
 
 Like CG, MINRES needs one matrix-vector product per iteration and a fixed number of stored vectors. CG minimizes the error in the $M$-norm, MINRES the residual in the 2-norm.
@@ -490,7 +490,7 @@ CG and MINRES are compared in @fig:task9-conv and @fig:task9-relres.
     align: (center, left, right, right, right, right, right, right),
     stroke: none,
     table.hline(),
-    [$lambda$], [*Method*], [*Iter.*], [*$M v$*], [*Sparse $m v$*], [*Time [s]*], [*Rel. res.*], [*Error*],
+    [$lambda$], [*Method*], [*Iter.*], [*$M v$*], [*Sparse mat-vec*], [*Time [s]*], [*Rel. res.*], [*Error*],
     table.hline(stroke: 0.5pt),
     [$0.01$], [CG], [$247$], [$248$], [$992$], [$2.68$], [$9.6 dot 10^(-9)$], [$0.032$],
     [], [MINRES], [$217$], [$218$], [$872$], [$2.21$], [$9.9 dot 10^(-9)$], [$0.032$],
@@ -513,11 +513,11 @@ The idea of preconditioning a problem is to turn it into a similar problem with 
 $
   C^(-1) M C^(-T) y = C^(-1) c, quad x = C^(-T) y.
 $
-Applying CG to this system and substituting back $x$ gives PCG, which is CG with $z_m = P^(-1) r_m$:
+Applying CG to this system and substituting back $x$ gives PCG, which is CG with $z_k = P^(-1) r_k$:
 $
-  alpha_m = (r_m^T z_m) / (p_m^T M p_m), quad
-  beta_m = (r_(m+1)^T z_(m+1)) / (r_m^T z_m), quad
-  p_(m+1) = z_(m+1) + beta_m p_m,
+  alpha_k = (r_k^T z_k) / (p_k^T M p_k), quad
+  beta_k = (r_(k+1)^T z_(k+1)) / (r_k^T z_k), quad
+  p_(k+1) = z_(k+1) + beta_k p_k,
 $
 with $p_0 = z_0$. The transformed system is never formed, since every iteration only needs one product with $M$ and one solve with $P$ (two triangular solves).
 
