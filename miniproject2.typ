@@ -493,7 +493,7 @@ $M$ is symmetric positive definite, which is exactly the case CG is designed for
 == Preconditioned CG
 The idea of preconditioning a problem is to turn it into a similar problem with a smaller condition number. To precondition for CG, the matrix has to stay SPD. A way of achieving this is with an incomplete Cholesky factorization $P = C C^T approx M$, where $C$ is sparse and lower triangular, we get the SPD system
 $
-  C^(-1) M C^(-T) tilde(x) = C^(-1) c, quad tilde(x) = C^T x.
+  C^(-1) M C^(-T) tilde(x) = C^(-1) c, quad tilde(x) = C^T x
 $
 Applying CG to this system with $tilde(M) = C^(-1) M C^(-T)$ gives
 $
@@ -501,7 +501,7 @@ $
   tilde(x)_(k+1) = tilde(x)_k + alpha_k tilde(p)_k, quad
   tilde(r)_(k+1) = tilde(r)_k - alpha_k tilde(M) tilde(p)_k, \
   beta_k = (tilde(r)_(k+1)^T tilde(r)_(k+1)) / (tilde(r)_k^T tilde(r)_k), quad
-  tilde(p)_(k+1) = tilde(r)_(k+1) + beta_k tilde(p)_k,
+  tilde(p)_(k+1) = tilde(r)_(k+1) + beta_k tilde(p)_k
 $
 and the solution is recovered from $x = C^(-T) tilde(x)$. In practice, $tilde(M)$ is never formed. With $r = C tilde(r)$ and $p = C^(-T) tilde(p)$, the same operations can be carried out in the original coordinate system, where every iteration only needs one product with $M$.
 
