@@ -320,12 +320,12 @@ LSQR and CG solve the same problem, since $M = hat(A)^T hat(A)$ and $c = hat(A)^
 #pagebreak()
 == Blur matrix $A$
 To blur the image, the vector $x_"true"$ is multiplied by a blurring matrix $A$.
-$A$ comes from the continuous blur model (1.8)
+$A$ comes from the continuous blur model
 $
   b(s) = integral K(s, t) x(t) dif t + e(s)
 $
 where $b(s)$ is the blurred image and $e(s)$ is the noise, which in this case is Gaussian.
-$K(s,t)$ is called the _point spread function_ and determines how much each pixel is affected by every other pixel in the image. We use the Gaussian kernel (1.9) with $B = beta I$, where $beta$ controls how strongly pixels far away contribute:
+$K(s,t)$ is called the _point spread function_ and determines how much each pixel is affected by every other pixel in the image. We use an isotropic Gaussian kernel, where $beta$ controls how strongly pixels far away contribute:
 $
   K(s, t) = c e^(-beta norm(s - t)_2^2)
 $
