@@ -130,7 +130,7 @@
 #counter(page).update(1)
 
 = Introduction
-In this project we study iterative methods for solving linear systems. We apply these methods to recover a sharp image from a blurred one. The task boils down to a very large least squares problem, and with a dense matrix of that size the direct methods introduced earlier become too expensive. We therefore make the matrix artificially sparse and use iterative methods that are built for sparse problems. The deblurring problem is, however, ill-posed, so small amounts of noise can ruin the solution, and we show how regularization turns it into a solvable one.
+In this project we study iterative methods for solving linear systems. We apply these methods to recover a sharp image from a blurred one. The task is a very large least squares problem, and with a dense matrix of that size the direct methods introduced earlier become too expensive. We therefore make the matrix artificially sparse and use iterative methods that are built for sparse problems. The deblurring problem is, however, ill-posed, so small amounts of noise can ruin the solution, and we show how regularization can improve the solution.
 
 
 = Method
@@ -177,7 +177,7 @@ $
   f(x) = underbrace(norm(A x - b)_2^2, "fit the observed data") + underbrace(lambda^2 norm(L x)_2^2, "encourage smoothness")
 $ <eq:tik>
 
-where $lambda > 0$ balances the two terms: too small leaves noise, too large loses details and edges.
+where $lambda > 0$ balances the two terms. Too small $lambda$ leaves noise and too large loses details.
 
 #pagebreak()
 == The normal equations
@@ -325,7 +325,7 @@ $
   b(s) = integral K(s, t) x(t) dif t + e(s)
 $
 where $b(s)$ is the blurred image and $e(s)$ is the noise, which in this case is Gaussian.
-$K(s,t)$ is called the _point spread function_ and determines how much each pixel is affected by every other pixel in the image. We use an isotropic Gaussian kernel, where $beta$ controls how strongly pixels far away contribute:
+$K(s,t)$ is called the point spread function and determines how much each pixel is affected by every other pixel in the image. We use the Gaussian kernel with $B = beta I$, where $beta$ controls how strongly pixels far away contribute:
 $
   K(s, t) = c e^(-beta norm(s - t)_2^2)
 $
@@ -488,7 +488,7 @@ CG and MINRES are compared in @fig:task9-conv and @fig:task9-relres.
 ) <tab:task9>
 
 == Why CG is expected to outperform MINRES
-$M$ is symmetric positive definite, which is exactly the case CG is designed for. MINRES is designed for symmetric indefinite systems, which is a more general case. In every iteration CG gives the smallest possible value of the regularized least squares objective $f$ in the Krylov space. MINRES instead minimizes $norm(c - M x)_2$. That makes CG a better fit here.
+$M$ is symmetric positive definite, which is the case CG where CG is optimal. MINRES is designed for symmetric indefinite systems, which is a more general case. In every iteration CG gives the smallest possible value of the regularized least squares objective $f$ in the Krylov space. MINRES instead minimizes $norm(c - M x)_2$. This means that CG is the preferred method for this problem.
 
 == Preconditioned CG
 The idea of preconditioning a problem is to turn it into a similar problem with a smaller condition number. To precondition for CG, the matrix has to stay SPD. A way of achieving this is with an incomplete Cholesky factorization $P = C C^T approx M$, where $C$ is sparse and lower triangular, we get the SPD system
