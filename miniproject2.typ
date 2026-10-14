@@ -488,7 +488,7 @@ CG and MINRES are compared in @fig:task9-conv and @fig:task9-relres.
 ) <tab:task9>
 
 == Why CG is expected to outperform MINRES
-$M$ is symmetric positive definite, which is exactly the case CG is designed for. MINRES is designed for symmetric indefinite systems, which is a more general case. In every iteration CG gives the smallest possible value of the regularized least squares objective $f$ in the Krylov space. MINRES instead minimizes $norm(c - M x)_2$. That makes CG a better fit here, and it usually needs fewer iterations and less work.
+$M$ is symmetric positive definite, which is exactly the case CG is designed for. MINRES is designed for symmetric indefinite systems, which is a more general case. In every iteration CG gives the smallest possible value of the regularized least squares objective $f$ in the Krylov space. MINRES instead minimizes $norm(c - M x)_2$. That makes CG a better fit here.
 
 == Preconditioned CG
 The idea of preconditioning a problem is to turn it into a similar problem with a smaller condition number. To precondition for CG, the matrix has to stay SPD. A way of achieving this is with an incomplete Cholesky factorization $P = C C^T approx M$, where $C$ is sparse and lower triangular, we get the SPD system
