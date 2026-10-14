@@ -133,7 +133,6 @@
 In this project we study iterative methods for solving linear systems. We apply these methods to to recover a sharp image from a blurred one. The task boils down to a very large least squares problem, and with a dense matrix of that size the direct methods introduced earlier become too expensive. We therefore make the matrix artificially sparse and use iterative methods that are built for sparse problems. The deblurring problem is, however, ill-posed, so small amounts of noise can ruin the solution, and we show how regularization turns it into a solvable one.
 
 
-#pagebreak()
 = Method
 Direct methods like GSVD need too much storage and computation for large image problems. We instead use iterative methods, which refine the solution step by step using mainly matrix-vector products and a few stored vectors.
 
@@ -184,6 +183,7 @@ $ <eq:tik>
 
 where $lambda > 0$ balances the two terms: too small leaves noise, too large loses details and edges.
 
+#pagebreak()
 == The normal equations
 We write out $f$ and set its gradient to zero:
 $
@@ -205,25 +205,16 @@ $
   "rank"( mat(A; L) ) = n.
 $
 
-Using the matrix
-
-$
-  M = A^T A + lambda^2 L^T L.
-$
-
-we want to prove that $M$ is symmetric positive definite.
-
+Using
+$M = A^T A + lambda^2 L^T L$ we want to prove that $M$ is symmetric positive definite.
 A matrix is symmetric if $M^T = M$. Taking the transpose gives
 
 $
-  M^T & = (A^T A + lambda^2 L^T L)^T \
-      & =(A^T A)^T + lambda^2 (L^T L)^T \
-      & = A^T A + lambda^2 L^T L = M.
+  M^T & = (A^T A + lambda^2 L^T L)^T && =(A^T A)^T + lambda^2 (L^T L)^T \
+      & = A^T A + lambda^2 L^T L     && = M.
 $
 
-Therefore, $M$ is symmetric.
-
-A symmetric matrix $M$ is positive definite if
+Therefore, *$M$ is symmetric*. A symmetric matrix is positive definite if
 
 $
   z^T M z > 0
@@ -258,7 +249,7 @@ $
 $
 
 Now let $z != 0$. It follows that $A z$ and $L z$
-cannot both be zero at the same time. In other words at least on is greater than zero. Which means $M$ is symmetric positive definite.
+cannot both be zero at the same time. In other words at least on is greater than zero. Which means *$M$ is symmetric positive definite*.
 
 
 == Iterative Krylov subspace methods
@@ -330,6 +321,7 @@ These are sparse matrix-vector products so no matrix-matrix product is needed.
 
 LSQR and CG solve the same problem, since $M = hat(A)^T hat(A)$ and $c = hat(A)^T hat(b)$, and in exact arithmetic they give the same iterates. Both use four sparse products per iteration and store only a few vectors. The difference is the rounding errors. CG works with $M$, and $kappa(M) = kappa(hat(A))^2$, so the errors are amplified more. LSQR works with $hat(A)$, which makes it more accurate for ill-conditioned problems, that is for small $lambda$. The disadvantage is that LSQR is more complicated and does slightly more work per iteration, so for a well-conditioned problem CG is just as good and simpler @paige1982lsqr.
 
+#pagebreak()
 == Blur matrix $A$
 To blur the image, the vector $x_"true"$ is multiplied by a blurring matrix $A$.
 $A$ comes from the continuous blur model (1.8)
@@ -357,6 +349,7 @@ The order of the factors follows from $x = "vec"(X)$ stacking the columns of $X$
 
 $A$ is now a dense #thousands(t6A.rows) $times$ #thousands(t6A.cols) matrix, which requires #mem(t6A.dense_bytes) of memory. This is unreasonably large, and pixels far apart barely affect each other anyway. So instead of storing $A$ as a dense matrix, entries below a threshold ($epsilon$) can be set to zero and the matrix can be stored in CSR (compressed sparse row) format.
 
+#pagebreak()
 == The regularization matrix $L$
 To penalize images that are not smooth, we need a matrix $L$ that measures how much neighbouring pixels differ. We start in one dimension, where the first-order difference matrix
 $
@@ -378,6 +371,7 @@ To see how much we gain from storing $A$ as a sparse matrix, we look at its spar
   caption: [Sparsity pattern of $A$ ($beta = #t6beta$, $epsilon = #t6eps$). Left: all of $A$. Right: the first $3 n_1$ rows and columns, showing the banded blocks of $A_2 times.o A_1$.],
 ) <fig:task6-spy-A>
 
+#pagebreak()
 == Sparsity pattern of $L$
 $L$ is even sparser than $A$ (@fig:task6-spy-L). Since every row has exactly two nonzeros, $L$ has #thousands(t6L.nnz) nonzeros, which is only $#num(percent(t6L), digits: 2) %$ of all entries. In CSR format, $L$ needs #mem(t6L.sparse_bytes) instead of #mem(t6L.dense_bytes) as a dense matrix.
 
@@ -423,7 +417,7 @@ A larger $epsilon$ also makes $A$ sparser, since more entries are set to zero. T
   ) <fig:task6-params>],
 )
 
-
+#pagebreak()
 = Results
 == Influence of the regularization parameter $lambda$ on CG
 We use the tolerance $10^(-8)$, at most $300$ iterations, and $lambda in {0, 0.01, 0.05, 0.3, 1}$. The results are shown in @fig:task8-lambda.
@@ -548,6 +542,7 @@ For solving inverse problems, direct methods and iterative Krylov methods have s
 // ---------------------------------------------------------------------------
 //  References
 // ---------------------------------------------------------------------------
+#pagebreak()
 #set heading(numbering: none)
 #bibliography("references.bib", title: "References")
 
