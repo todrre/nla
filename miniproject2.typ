@@ -498,9 +498,7 @@ CG and MINRES are compared in @fig:task9-conv and @fig:task9-relres.
 ) <tab:task9>
 
 == Why CG is expected to outperform MINRES
-$M$ is symmetric positive definite, which is exactly the case CG is designed for. MINRES is designed for symmetric indefinite systems, which is a more general case. In every iteration CG gives the smallest possible value of the regularized least squares objective $f$ in the Krylov space. MINRES instead minimizes $norm(c - M x)_2$.
-
-Fortsättning följer.
+$M$ is symmetric positive definite, which is exactly the case CG is designed for. MINRES is designed for symmetric indefinite systems, which is a more general case. In every iteration CG gives the smallest possible value of the regularized least squares objective $f$ in the Krylov space. MINRES instead minimizes $norm(c - M x)_2$. That makes CG a better fit here, and it usually needs fewer iterations and less work.
 
 == Preconditioned CG
 The idea of preconditioning a problem is to turn it into a similar problem with a smaller condition number. To precondition for CG, the matrix has to stay SPD. A way of achieving this is with an incomplete Cholesky factorization $P = C C^T approx M$, where $C$ is sparse and lower triangular, we get the SPD system
@@ -544,7 +542,7 @@ We compare CG and PCG, both starting from $x_0 = 0$ and stopping when the relati
 @tab:task10 shows that PCG needs about $10$ times fewer iterations than CG for all three values of $lambda$. Despite this, PCG is not faster: the solve itself takes about as long as CG, since each iteration is much more expensive, and building the incomplete Cholesky factor adds time. Both methods reach the tolerance and give the same reconstruction error, since they solve the same system to the same tolerance.
 
 = Summary
-We wanted to recover a sharp image $x_"true"$ from a blurred, noisy image $b = A x_"true" + e$. Solving $A x = b$ or the plain least squares problem amplifies the noise, because the blur matrix $A$ has many tiny singular values. Adding the regularization term $lambda^2 norm(L x)_2^2$ damps the noise, and the minimizer satisfies the normal equations $(A^T A + lambda^2 L^T L) x = A^T b$. For a $300 times 300$ image this is a $90 thin 000 times 90 thin 000$ system, too large for direct methods, so $A$ and $L$ are artificially made sparse. The best reconstruction is obtained with a good $lambda$ ($approx 0.05$) and a moderate tolerance. With a small $lambda$, stopping early acts as a regularizer. MINRES (Task 9) uses the same number of products per iteration and reaches a small residual slightly faster, but gives the same image, and CG is the natural method for this SPD problem.
+For solving inverse problems, direct methods and iterative Krylov methods have significant differences in terms of computational complexity, memory requirements, numerical stability, scalability, and suitability for small and large problems. Direct methods require significant memory and computational resources, using dense matrix operations, especially for large problems. However, they are often more numerically stable and can provide better solutions. Krylov subspace methods are more memory-efficient and scalable, making them suitable for large problems, but they may be less stable and require careful tuning of parameters. Direct methods are advantageous for small problems due to their accuracy, while iterative methods are preferred in large-scale applications.
 
 
 // ---------------------------------------------------------------------------
