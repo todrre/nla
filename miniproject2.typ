@@ -493,17 +493,19 @@ $M$ is symmetric positive definite, which is exactly the case CG is designed for
 == Preconditioned CG
 The idea of preconditioning a problem is to turn it into a similar problem with a smaller condition number. To precondition for CG, the matrix has to stay SPD. A way of achieving this is with an incomplete Cholesky factorization $P = C C^T approx M$, where $C$ is sparse and lower triangular, we get the SPD system
 $
-  C^(-1) M C^(-T) y = C^(-1) c, quad x = C^(-T) y.
+  C^(-1) M C^(-T) tilde(x) = C^(-1) c, quad tilde(x) = C^T x.
 $
-Applying CG to this system and substituting back $x$ gives PCG, which is CG with $z_k = P^(-1) r_k$:
+Applying CG to this system with $tilde(M) = C^(-1) M C^(-T)$ gives
 $
-  alpha_k = (r_k^T z_k) / (p_k^T M p_k), quad
-  beta_k = (r_(k+1)^T z_(k+1)) / (r_k^T z_k), quad
-  p_(k+1) = z_(k+1) + beta_k p_k,
+  alpha_k = (tilde(r)_k^T tilde(r)_k) / (tilde(p)_k^T tilde(M) tilde(p)_k), quad
+  tilde(x)_(k+1) = tilde(x)_k + alpha_k tilde(p)_k, quad
+  tilde(r)_(k+1) = tilde(r)_k - alpha_k tilde(M) tilde(p)_k, \
+  beta_k = (tilde(r)_(k+1)^T tilde(r)_(k+1)) / (tilde(r)_k^T tilde(r)_k), quad
+  tilde(p)_(k+1) = tilde(r)_(k+1) + beta_k tilde(p)_k,
 $
-with $p_0 = z_0$. The transformed system is never formed, since every iteration only needs one product with $M$ and one solve with $P$ (two triangular solves).
+and the solution is recovered from $x = C^(-T) tilde(x)$. In practice, $tilde(M)$ is never formed. With $r = C tilde(r)$ and $p = C^(-T) tilde(p)$, the same iteration can be carried out in the original variables, where every iteration only needs one product with $M$ and one solve with $P$ (two triangular solves).
 
-We compare CG and PCG, both starting from $x_0 = 0$ and stopping when the relative residual $norm(c - M x_k)_2 \/ norm(c)_2$ is below $10^(-6)$ or after $500$ iterations (@fig:task10, @tab:task10).
+We compare CG and PCG, both starting from $x_0 = 0$ and stopping when the relative residual is below $10^(-6)$ or after $500$ iterations (@fig:task10, @tab:task10).
 
 #figure(
   image("assets/task10_cg_vs_pcg.svg", width: 100%),
